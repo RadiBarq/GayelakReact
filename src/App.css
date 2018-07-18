@@ -1,0 +1,105 @@
+.App {
+  text-align: center;
+  overflow: hidden;
+}
+
+.App-logo {
+
+  animation: App-logo-spin infinite 20s linear;
+  height: 80px;
+
+}
+
+@import "~slick-carousel/slick/slick.css";
+@import "~slick-carousel/slick/slick-theme.css"
+
+.bm-overlay {
+
+}
+
+.aboutUsModal
+{
+  z-index: 100;
+  position: fixed;
+}
+
+@font-face {
+  font-family: 'DINRundschriftMittel';
+  src: url('./fonts/DINRundschriftMittel.otf');
+}
+
+.brandLabel
+{  
+  color: rgb(52, 127, 251);
+  font-family: 'DINRundschriftMittel';
+  font-size: 30pt;
+
+}
+
+.toastBody
+{
+  color: #000000;
+  text-align: right;
+}
+
+.bm-menu {
+
+  background: #ffffff;
+  padding: 2.5em 1.5em 0;
+  font-size: 1.15em;
+  position: "fixed";
+
+}
+
+.content
+{
+  width: 70%;
+  position: absolute;
+
+}
+
+
+.imageModal
+{
+    z-index: 100;
+    position: fixed;
+}
+
+.downloadModal
+{
+  z-index: 100;
+  position: fixed;
+}
+
+.bm-cross-button {
+
+  margin-top: 20px;
+  margin-right: 10px;
+  width: 60px; 
+}
+
+/* Color/shape of close button cross */
+.bm-cross {
+
+  background: #000000;
+}
+
+.App-header {
+  background-color: #222;
+  height: 150px;
+  padding: 20px;
+  color: white;
+}
+
+.App-title {
+  font-size: 1.5em;
+}
+
+.App-intro {
+  font-size: large;
+}
+
+@keyframes App-logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

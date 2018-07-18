@@ -1,0 +1,73 @@
+.brandName
+{
+    color: black;
+}
+
+.brandLogo
+{
+    width: 75px;
+    padding-top: 0px;  
+}
+.downloadLabel
+{
+    font-weight: bold;
+    color: black;
+    white-space: nowrap;      
+    overflow: hidden;         
+    text-overflow: ellipsis;
+
+}
+
+.downloadButton
+{
+    font-weight: bold;
+    color: black;
+    white-space: nowrap;      
+    overflow: hidden;         
+    text-overflow: ellipsis;
+}
+
+.moreIcon
+{
+    color:red;
+}
+
+.header
+{
+     background-color: white; 
+     
+     height: 91px;
+}
+
+.content
+{
+    padding-top: 100px;
+    display: block;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+    height: 100%;
+    margin-right: 10.5%;
+    z-index: 0;
+}
+.content-small
+{
+    padding-top: 100px;
+    display: block;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+    height: 100%;
+    margin-right: 16.0%; 
+}
+
+.fixed{
+
+    position: fixed;
+    width: 100%;
+    background-color: white;
+    z-index: 80;
+    overflow: hidden;
+   -webkit-overflow-scrolling: touch;
+
+}
