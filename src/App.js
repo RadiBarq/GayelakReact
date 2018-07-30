@@ -67,7 +67,9 @@ class App extends React.Component {
       enableBottomScrolling: false,
       currentItems: [],
       finalArray: [],
-      bottomLoader: false
+      bottomLoader: false,
+      clickedCategory: 0
+
     };
 
     var config = {
@@ -97,10 +99,10 @@ class App extends React.Component {
     this.setLocationDisabled = this.setLocationDisabled.bind(this)
     this.handleScroll = this.handleScroll.bind(this);
     this.onClickCategory = this.onClickCategory.bind(this);
+
   }
 
   componentDidMount() {
-
     window.addEventListener("scroll", this.handleScroll);
   }
 
@@ -115,17 +117,35 @@ class App extends React.Component {
     var counter = 0
     var self = this
     var itms = []
-    var categoryHash = {"category-car": 9, "phone-category": 8, "category-aparment": 7, "category-home": 6, "category-dog": 5, "category-sport": 4, "cateogry-clothes": 3, "category-kids": 2, "category-books": 1, "category-others": 0}
+
+
+    if (keys.length == 0)
+    {
+      self.setState({
+
+        items: self.state.items.concat(itms),
+        finalArray: self.state.finalArray.concat(keys),
+        areItemsReady: true,
+        bottomLoader: false,
+        distances: dist,
+        distUnits: distUnits,
+        itemsCurrentSize: keys.length + self.state.finalArray.length,
+        lat: lat,
+        long: long,
+        enableBottomScrolling: true
+
+      });
+    }
 
 
     for (var i = 0; i < keys.length; i++) {
 
-      firebase.database().ref('/items/' + keys[i]).once('value').then(function (snapshot) {
+        firebase.database().ref('/items/' + keys[i]).once('value').then(function (snapshot) {
+
         var price = snapshot.val().price
+
         if (price != "غير محدد") {
-
           price = snapshot.val().price + snapshot.val().currency
-
         }
 
         var description = snapshot.val().description
@@ -133,19 +153,17 @@ class App extends React.Component {
         var itemUserId = snapshot.val().userId
         var title = snapshot.val().title
         var imagesCount = snapshot.val().imagesCount
-        var category = snapshot.val().category
-        console.log(category)
 
-        itms.push({
+          itms.push({
 
-          price: price,
-          description: description,
-          displayName: displayName,
-          itemUserId: itemUserId,
-          title: title,
-          imagesCount: imagesCount
+            price: price,
+            description: description,
+            displayName: displayName,
+            itemUserId: itemUserId,
+            title: title,
+            imagesCount: imagesCount
 
-        })
+          })
 
         if (counter == keys.length - 1) {
 
@@ -161,21 +179,42 @@ class App extends React.Component {
             lat: lat,
             long: long,
             enableBottomScrolling: true
-            
 
           });
         }
-
+        
         counter = counter + 1
 
       });
     }
   }
 
+
+  onClickSearchItem()
+  {
+
+    console.log("search item clicked")
+
+
+  }
+
   getItems(lat, long) {
 
-   
-    var firebaseRef = firebase.database().ref().child("items-location")
+    var firebaseRef = firebase.database().ref()
+    var categoryHash = {10:"category-others" , 9:"category-sports", 8:"category-books", 7:"category-kids" ,6:"category-clothes" , 5:"category-dog", 4:"cateogry-home", 3:"category-aparment", 2:"phone-category", 1:"category-car"}
+    console.log(this.state.clickedCategory)
+    console.log(this.state.items)
+
+    if (this.state.clickedCategory == 0)
+    {
+       firebaseRef = firebaseRef.child("items-location")
+    }
+
+    else
+    {
+      firebaseRef = firebaseRef.child("categories-location").child(categoryHash[this.state.clickedCategory])
+    }
+
     var geoFire = new Geofire(firebaseRef)
     var itmKey = []
     var dist = []
@@ -192,14 +231,17 @@ class App extends React.Component {
     var onKeyEnteredRegistration = geoQuery.on("key_entered", function (key, location, distance) {
 
       if (distance < 1) {
+
         distance = (distance.toFixed(1) * 100).toString()
         self.state.distUnits.push("متر")
+
       }
 
       else {
 
         distance = distance.toFixed(2).toString()
         self.state.distUnits.push("كلم")
+
       }
 
       self.state.itemsKey.push(key)
@@ -210,7 +252,6 @@ class App extends React.Component {
 
     var onReadyRegistration = geoQuery.on("ready", function () {
 
-    
       if (self.state.currentRadius > self.state.maxRadius) {
 
         var uncommonArray = self.state.itemsKey.filter(function (obj) { return self.state.finalArray.indexOf(obj) == -1; });
@@ -227,9 +268,11 @@ class App extends React.Component {
           itemsKey: [],
           currentRadius: self.state.currentRadius + 0.5
 
-        })
+        } ,  () => {
 
-        self.getItems(lat, long)
+          self.getItems(self.state.lat, self.state.long)
+      });
+
       }
 
       else {
@@ -241,11 +284,12 @@ class App extends React.Component {
     });
   }
 
-
   onDismissAboutUs() {
+
     this.setState({
       aboutUsClicked: !this.state.aboutUsClicked
     })
+
   }
 
   onDismiss = () => {
@@ -304,7 +348,6 @@ class App extends React.Component {
     }
   }
 
-
   onClickDownloadFromItem() {
 
     this.onDismissImage()
@@ -356,6 +399,7 @@ class App extends React.Component {
     }
   }
 
+
   onClickMenu = () => {
 
     this.setState({
@@ -366,7 +410,7 @@ class App extends React.Component {
 
   isMenuOpen = function (state) {
     this.setState({
-
+      
       isSideMenuOpen: state.isOpen,
       gridItemsChanged: false
 
@@ -471,6 +515,8 @@ class App extends React.Component {
           {
             gridItems
           }
+      
+
         </StackGrid>
 
         <Box marginTop={2}>
@@ -481,7 +527,6 @@ class App extends React.Component {
       )
     }
   }
-
 
   renderSideMenu() {
 
@@ -544,68 +589,33 @@ class App extends React.Component {
     )
   }
 
-
-  onClickCategory(clickedCategory)
+  onClickCategory(key)
   {
 
-    if (clickedCategory == 0)
-    {
-    
+    window.scrollTo(0, 0)   
+    console.log(key)
 
-    }
+    this.setState({
 
-    else if(clickedCategory == 1)
-    {
+      clickedCategory: key,
+      currentRadius: 0.2,
+      distUnits: [],
+      distances: [],
+      itemsKey: [],
+      areItemsReady: false,
+      finalArray: [],
+      items: [],
+      currentItems: [],
+      itemsCurrentSize: 0,
+      bottomLoader: false,
+      enableBottomScrolling: false
 
-    }
+    },  () => {
 
-    else if(clickedCategory == 2)
-    {
+      this.getItems(this.state.lat, this.state.long)
+  });
 
-
-    }
-
-    else if(clickedCategory == 3)
-    {
-
-
-    }
-
-    else if (clickedCategory == 4)
-    {
-
-    }
-
-    else if (clickedCategory == 5)
-    {
-
-
-    }
-
-    else if (clickedCategory == 6)
-    {
-
-
-    }
-
-    else if (clickedCategory == 7)
-    {
-
-    }
-
-
-    else if (clickedCategory == 8)
-    {
-
-    }
-
-    else if (clickedCategory == 9)
-    {
-
-      
-    }
-
-  }
+}
 
   setLocationEnabled() {
     this.setState(
@@ -626,10 +636,12 @@ class App extends React.Component {
   renderDownloadModal() {
 
     const downloadLabelStyle = {
+
       color: 'black',
       fontSize: "14px",
       fontWeight: "bold",
       textAlign: "right"
+
     };
 
     return (
@@ -712,9 +724,11 @@ class App extends React.Component {
           itemsKey: [],
           bottomLoader: true
 
-        })
+        },  () => {
 
         this.getItems(this.state.lat, this.state.long)
+
+    });
 
       } else {
 
@@ -793,10 +807,12 @@ class App extends React.Component {
               )}
               
             <Box marginTop={12}>
+
               <Spinner show={!this.state.areItemsReady} accessibilityLabel="Loading Spinner" />
               {!this.state.isLocationAvailable && (
                 <h3 style={{ marginLeft: "30%", marginRight: "30%", textAlign: "center" }}> !الرجاء تفعيل خدمة المواقع في المتصفح</h3>
               )}
+
             </Box>
           </div>
 

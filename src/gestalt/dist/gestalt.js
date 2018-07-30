@@ -1357,7 +1357,7 @@ Mask.propTypes = {
   wash: PropTypes.bool
 };
 
-var typography = { "antialiased": "_s7", "sansSerif": "_s8", "letterSpacing": "_s9", "leadingShort": "_sa", "leadingTall": "_sb", "fontWeightNormal": "_sc", "fontWeightBold": "_sd", "fontStyleRegular": "_se", "fontStyleItalic": "_sf", "underline": "_sg", "noUnderline": "_sh", "breakWord": "_si", "truncate": "_sj", "alignLeft": "_sk", "alignRight": "_sl", "alignCenter": "_sm", "textJustify": "_sn" };
+var typography = { "antialiased": "_s7", "sansSerif": "_s8", "letterSpacing": "_s9", "leadingShort": "_sa", "leadingTall": "_sb", "fontWeightNormal": "_sc", "fontWeightBold": "_sd", "fontStyleRegular": "_se", "fontStyleItalic": "_sf", "underline": "_sg", "noUnderline": "_sh", "breakWord": "_si", "truncate": "_sj", "alignRight": "_sk", "alignRight": "_sl", "alignCenter": "_sm", "textJustify": "_sn" };
 
 var Square = function Square(props) {
   return React.createElement(
@@ -1543,7 +1543,7 @@ var SIZE_SCALE = {
 
 function Text(_ref) {
   var _ref$align = _ref.align,
-      align = _ref$align === undefined ? 'left' : _ref$align,
+      align = _ref$align === undefined ? 'right' : _ref$align,
       _ref$bold = _ref.bold,
       bold = _ref$bold === undefined ? false : _ref$bold,
       children = _ref.children,

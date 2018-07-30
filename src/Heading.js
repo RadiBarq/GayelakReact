@@ -8,20 +8,38 @@ class Heading extends React.Component {
 
     constructor(props) {
         super(props);
+        this.state = {value: ''}
+        this.keyPress = this.keyPress.bind(this);
     }
-    
+
+    keyPress(e){
+
+        if(e.keyCode == 13){
+        console.log(this.state.value)
+        }
+        
+     }
+
     onTouchMove(event) {
 
         return false
     }
 
     componentDidMount () {
-
+        
     }
-    
+
+    keyPress(e){
+        if(e.keyCode == 13){
+          console.log(this.state.value)
+           // put the login here
+        }
+     }
+
     render() {
 
         const brandLogoImage = {
+
         }
 
         return (<div className="header">
@@ -32,12 +50,13 @@ class Heading extends React.Component {
                     />
                 </Box>
 
-                <Box flex="grow" paddingX={2}>
+                <Box flex="grow" paddingX={2} onKeyDown={this.keyPress}>
                     <SearchField
-                        accessibilityLabel="Demo Search Field"
+                        accessibilityLabel="ابحث في جايلك"
                         id="searchField"
+                      
                         onChange={({ value }) => this.setState({ value })}
-                        placeholder=""
+                        value = {this.state.value}
                     />
                 </Box>
                 <Box paddingX={2}>

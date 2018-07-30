@@ -7,144 +7,206 @@ import './Navigation.css';
 import ReactList from 'react-list';
 import { isAndroid, isIOS, BrowserView, MobileView, isMobile, isBrowser, isTablet, isSmartTV } from 'react-device-detect';
 
-
 //import './Header.css';
 const components = Object.keys(routes);
 
 class Navigation extends React.Component {
 
+  componentDidMount() {
+
+  }
+
   constructor(props) {
 
     super(props)
-
     this.state = {
-      navigationItems: ["الرياضة و الالعاب", "اغراض اخرى", "افلام، كتب و اغاني", "الاطفال", "ملابس و اكسسوارات", "حيوانات", "البيت و الحديقة", "شقق و اراضي", "الكترونيات", "سيارات"]
+
+      navigationItems: ["جميع المنتجات", "سيارات", "الكترونيات", "شقق و اراضي", "البيت و الحديقة", "حيوانات", "ملابس و اكسسوارات", "الاطفال", "افلام، كتب و اغاني", "الرياضة و الالعاب", "اغراض اخرى"],
+      clickedItem: 0
+
     }
 
     this.renderItem = this.renderItem.bind(this);
     this.renderNavigation = this.renderNavigation.bind(this);
+    this.onClickItem = this.onClickItem.bind(this);
+    this.scrollSomewhere = this.scrollSomewhere.bind(this);
+  }
 
+  scrollSomewhere() {
+
+    this.list.scrollTo(0)
+
+  }
+
+  onClickItem(key) {
+
+    this.setState({
+      clickedItem: key
+    })
+
+    this.props.onClickCategory(key)
   }
 
   renderItem(index, key) {
 
     if (isMobile) {
 
-      const menuItemsSmallLabelStyle = {
+      var menuItemsSmallLabelStyle = {}
 
-        fontSize: "10pt",
-        fontWeight: "bold",
-        marginRight: "7.5px",
-        marginLeft: "7.5px"
+      if (index === this.state.clickedItem) {
+
+        menuItemsSmallLabelStyle = {
+
+          fontSize: "10pt",
+          fontWeight: "bold",
+          marginRight: "7.5px",
+          marginLeft: "7.5px",
+          color: "rgb(52, 127, 251)"
+
+        }
       }
 
-      return <label onClick = {this.props.onClickCategory(key)} style={menuItemsSmallLabelStyle} key={key}>{this.state.navigationItems[index]}</label>
+      else {
+        
+        menuItemsSmallLabelStyle = {
+
+          fontSize: "10pt",
+          fontWeight: "bold",
+          marginRight: "7.5px",
+          marginLeft: "7.5px"
+
+        }
+      }
+
+      return <label onClick={() => this.onClickItem(key)} style={menuItemsSmallLabelStyle} key={key}>{this.state.navigationItems[index]}</label>
 
     }
 
     else {
 
-      const menuItemsLabelStyle = {
+      var menuItemsLabelStyle = {}
 
-        fontSize: "10.5pt",
-        fontWeight: "bold",
-        marginRight: "25px",
-        marginLeft: "25px"
+      if (this.state.clickedItem == index) {
 
-      } 
-    
-      return <label onClick = {() => this.props.onClickCategory(key)}  style={menuItemsLabelStyle} key={key}>{this.state.navigationItems[index]}</label>;
+        menuItemsLabelStyle = {
+
+          fontSize: "10.5pt",
+          fontWeight: "bold",
+          marginRight: "19px",
+          marginLeft: "19px",
+          color: "rgb(52, 127, 251)"
+        }
+
+      }
+
+      else {
+
+        menuItemsLabelStyle = {
+
+          fontSize: "10.5pt",
+          fontWeight: "bold",
+          marginRight: "19px",
+          marginLeft: "19px"
+
+        }
+      }
+
+      return <label onClick={() => this.onClickItem(key)} style={menuItemsLabelStyle} key={key}>{this.state.navigationItems[index]}</label>;
 
     }
   }
 
-  renderNavigation()
-  {
-      if (isMobile && !isTablet)
-      {
-        return(
-        <div className="fixedBlock">
-        <Box
-          display="flex"
-          position="absolute"
+  renderNavigation() {
 
-          width="100%"
-          paddingY={0}
-          direction="row"
-          overflow="auto"
-          height={37}
-          color="white"
-        >
+    if (isMobile && !isTablet) {
+      return (
+
+        <div className="fixedBlock">
+
           <Box
             display="flex"
+            position="absolute"
+            width="100%"
+            paddingY={0}
+            direction="row"
             overflow="auto"
+            height={36}
             color="white"
-            height={37}
-            wrap={true}
           >
+          
+            <Box
+              display="flex"
+              overflow="auto"
+              color="white"
+              height={36}
+              wrap={true}
+            >
 
-            <Box role="listitem" flex="none" >
+              <Box role="listitem" flex="none" >
 
-              <ReactList
-                itemRenderer={this.renderItem}
-                length={this.state.navigationItems.length}
-                type='uniform'
-              />
+                <ReactList
+                  itemRenderer={this.renderItem}
+                  type='simple'
+                  length={this.state.navigationItems.length}
+                  initialIndex = {10}
+                  axis = "x"
+                />
 
-              <Box marginTop={5} position="absolute" width="100%">
-                <Divider />
+                <Box marginTop={4} position="absolute" width="100%">
+                  <Divider />
+                </Box>
               </Box>
             </Box>
           </Box>
-        </Box>
-        <Divider />
-      </div>
-        )
-      }
+          <Divider />
+        </div>
+      )
+    }
 
-      else
-      {
-        return(
+    else {
+      return (
         <div className="fixedBlock">
-        <Box
-          display="flex"
-          position="absolute"
-          width="100%"
-          paddingY={0}
-          direction="row"
-          height={37}
-          color="white"
-          alignContent = "center"
-          justifyContent = "around"
-        >
           <Box
             display="flex"
-            overflow="auto"
-            color="white"
-            overflow = "auto"
+            position="absolute"
+            width="100%"
+            paddingY={0}
+            direction="row"
             height={37}
-            wrap={true} 
+            color="white"
+            alignContent="center"
+            justifyContent="around"
           >
-            <Box role="listitem" flex="none" >
+            <Box
+              display="flex"
+              overflow="auto"
+              color="white"
+              overflow="auto"
+              height={37}
+              wrap={true}
+            >
 
-              <ReactList
-                itemRenderer={this.renderItem}
-                length={this.state.navigationItems.length}
-                type='uniform'
-              />
+              <Box role="listitem" flex="none" >
 
-              <Box marginTop={5} position = "fixed" width="100%" alignSelf = "stretch" color = "white">
-                <Divider />
+                <ReactList
+                  itemRenderer={this.renderItem}
+                  length={this.state.navigationItems.length}
+                  type='simple'
+                  initialIndex = {10}
+                  axis = "x"
+                />
+
+                <Box marginTop={4} position="fixed" width="100%" alignSelf="stretch" color="white">
+                  <Divider />
+                </Box>
               </Box>
             </Box>
           </Box>
-        </Box>
-        <Divider />
-      </div>
-        )
-      }
+          <Divider />
+        </div>
+      )
+    }
   }
-
 
   render() {
 
@@ -198,16 +260,15 @@ class Navigation extends React.Component {
       marginLeft: "7.5px",
     }
 
-
     return (
 
       <div className="navigation">
         <Box
           paddingY={0}
         >
-        {
-          this.renderNavigation()
-        }
+          {
+            this.renderNavigation()
+          }
 
         </Box>
       </div>
