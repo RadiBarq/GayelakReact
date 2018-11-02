@@ -20,7 +20,10 @@ import 'react-toastify/dist/ReactToastify.css';
 import AboutUsContent from './AboutUsContent';
 import Geofire from 'geofire';
 import GeoLocation from './GeoLocation'
+
 import { geolocated } from 'react-geolocated';
+import LoginContent from './LoginContent';
+import SignUpContent from './SignUpContent';
 
 type Props = {|
   children?: React.Node,
@@ -38,6 +41,8 @@ class App extends React.Component {
     this.state = {
 
       isDownloadModalOpen: false,
+      loginClicked: false,
+      signUpClicked : false,
       isSideMenuOpen: false,
       gridItemsChanged: true,
       isImageClicked: false,
@@ -83,6 +88,7 @@ class App extends React.Component {
 
     };
 
+
     firebase.initializeApp(config)
     this.onDismiss = this.onDismiss.bind(this);
     this.onClickMenu = this.onClickMenu.bind(this);
@@ -91,6 +97,8 @@ class App extends React.Component {
     this.onTouchHeader = this.onTouchHeader.bind(this);
     this.onDismissImage = this.onDismissImage.bind(this);
     this.onDismissAboutUs = this.onDismissAboutUs.bind(this);
+    this.onDismissLogin = this.onDismissLogin.bind(this);
+    this.onDismissSignUp = this.onDismissSignUp.bind(this);
     this.getItems = this.getItems.bind(this);
     this.itemsReady = this.itemsReady.bind(this);
     this.renderLargeGrid = this.renderLargeGrid.bind(this);
@@ -289,8 +297,25 @@ class App extends React.Component {
     this.setState({
       aboutUsClicked: !this.state.aboutUsClicked
     })
+  }
+
+  onDismissLogin()
+  {
+    this.setState({
+      loginClicked: !this.state.loginClicked
+    })
 
   }
+
+
+  onDismissSignUp()
+  {
+    this.setState({
+      signUpClicked: !this.state.signUpClicked
+    })
+
+  }
+
 
   onDismiss = () => {
 
@@ -302,7 +327,23 @@ class App extends React.Component {
 
   onClickSideMenuItem(itemId) {
 
-    if (itemId == 0) {
+      if (itemId == 0) {
+
+        this.onDismissMenu()
+        this.setState({
+          loginClicked: true
+        })
+     }
+
+    else if (itemId == 1) {
+
+      this.onDismissMenu()
+        this.setState({
+          signUpClicked: true
+        })
+    }
+
+     else if (itemId ==2) {
       toast("يمكنك التواصل معنا حاليا عبر وسائل التواصل الاجتماعي المتوافرة في اعلى القائمة", {
         autoClose: 4000,
         bodyClassName: "toastBody",
@@ -310,7 +351,7 @@ class App extends React.Component {
       )
     }
 
-    else if (itemId == 1) {
+    else if (itemId == 3) {
 
       this.onDismissMenu()
       this.setState({
@@ -318,7 +359,7 @@ class App extends React.Component {
       })
     }
 
-    else if (itemId == 2) {
+    else if (itemId == 4) {
       this.onDismissMenu()
       toast("!عذرا لا تتوفر وظائف شاغرة حاليا     ", {
         autoClose: 4000,
@@ -327,7 +368,7 @@ class App extends React.Component {
       )
     }
 
-    else if (itemId == 3) {
+    else if (itemId == 5) {
 
       this.onDismissMenu()
       toast("!عذرا لا تتوفر سياسة الخصوصية حاليا     ", {
@@ -572,16 +613,18 @@ class App extends React.Component {
 
         <Box position="absolute" paddingY={0} marginTop={-2} marginRight={6} right={true} direction="column" display="flex" >
 
-          <label onClick={() => this.onClickSideMenuItem(0)} style={menuItemsLabelStyle}>
+          <label onClick = {() => this.onClickSideMenuItem(0)} style = {menuItemsLabelStyle}>تسجيل الدخول</label>
+          <label onClick = {() => this.onClickSideMenuItem(1)} style = {menuItemsLabelStyle}>التسجيل</label>
+          <label onClick={() => this.onClickSideMenuItem(2)} style={menuItemsLabelStyle}>
             تواصل معنا
                  </label>
-          <label onClick={() => this.onClickSideMenuItem(1)} style={menuItemsLabelStyle}>
-            عن جايلك</label>
-          <label onClick={() => this.onClickSideMenuItem(2)} style={menuItemsLabelStyle}>
-            وظائف</label>
           <label onClick={() => this.onClickSideMenuItem(3)} style={menuItemsLabelStyle}>
-            سياسة الخصوصية</label>
+            عن جايلك</label>
           <label onClick={() => this.onClickSideMenuItem(4)} style={menuItemsLabelStyle}>
+            وظائف</label>
+          <label onClick={() => this.onClickSideMenuItem(5)} style={menuItemsLabelStyle}>
+            سياسة الخصوصية</label>
+          <label onClick={() => this.onClickSideMenuItem(6)} style={menuItemsLabelStyle}>
             شروط الاستخدام</label>
 
         </Box>
@@ -790,6 +833,17 @@ class App extends React.Component {
             (<AboutUsContent onDismissAboutUs={this.onDismissAboutUs} />)
           }
 
+          {this.state.loginClicked &&
+
+            (<LoginContent onDismissAboutUs={this.onDismissLogin} />)
+          }
+
+          {this.state.signUpClicked &&
+
+            (<SignUpContent onDismissAboutUs={this.onDismissSignUp} />)
+          }
+
+          
           {isDownloadModalOpen && (
 
             this.renderDownloadModal()

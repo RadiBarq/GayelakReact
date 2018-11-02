@@ -1,4 +1,3 @@
-
 import React from 'react'
 import { Box, Column, Divider, Modal, Button, Text, Masonry, Heading, Avatar, Label, Spinner } from './gestalt';
 import "./App.css";
@@ -6,21 +5,21 @@ import testImage from './items_images/IMG_0098.jpg'
 import { Slide } from 'react-slideshow-image';
 import testAvatar from './images/face_1.jpg'
 import { width } from 'window-size';
-import image from './images/about-us-image.jpg'
+import image from './images/about-us-image.jpg';
 
-class AboutUsContent extends React.Component {
+class SignUpContent extends React.Component {
 
     constructor(props) {
-
         super(props)
-        
     }
-    
-    render() {
-        return (
 
-            <div className = "aboutUsModal">
+    render()
+    {
+        
+        return (
             
+         <div className = "aboutUsModal">
+
             <Modal
                 accessibilityCloseLabel="close"
                 accessibilityModalLabel="View random images"
@@ -35,8 +34,10 @@ class AboutUsContent extends React.Component {
                 </Box>
             </Modal>
             </div>
+
         )
     }
 }
 
-export default AboutUsContent
+
+export default SignUpContent;

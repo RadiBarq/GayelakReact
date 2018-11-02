@@ -7,16 +7,18 @@ import App from './App';
 import routes from './routes';
 import './gestalt/dist/gestalt.css';
 import './reset.css';
+import Chat from './Chat'
 import CardPage from './CardPage';
 import { slide as Menu } from 'react-burger-menu'
 import './App.css'
 import registerServiceWorker from './registerServiceWorker';
-
 const container = document.getElementById('root');
 
 
 if (container instanceof Element) {
     ReactDOM.render(
+
+      // <Chat />,
       <HashRouter>
         <App>
           <Switch>
