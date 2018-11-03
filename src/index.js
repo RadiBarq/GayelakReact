@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom';
 import { render } from 'react-dom';
 import './index.css';
 import App from './App';
+import Profile from './Profile'
 import routes from './routes';
 import './gestalt/dist/gestalt.css';
 import './reset.css';
@@ -18,20 +19,21 @@ const container = document.getElementById('root');
 if (container instanceof Element) {
     ReactDOM.render(
 
+      <Profile />,
       // <Chat />,
-      <HashRouter>
-        <App>
-          <Switch>
-            {Object.keys(routes).map(pathname => (
-              <Route
-                path={`/${pathname}`}
-                key={pathname}
-                render={() => <CardPage cards={routes[pathname]} />}
-              />
-            ))}
-          </Switch>
-        </App>
-      </HashRouter>,
+      // <HashRouter>
+      //   <App>
+      //     <Switch>
+      //       {Object.keys(routes).map(pathname => (
+      //         <Route
+      //           path={`/${pathname}`}
+      //           key={pathname}
+      //           render={() => <CardPage cards={routes[pathname]} />}
+      //         />
+      //       ))}
+      //     </Switch>
+      //   </App>
+      // </HashRouter>,
       container
     );
   } else {

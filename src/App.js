@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Box, Column, Divider, Modal, Button, Text, Masonry, Spinner } from './gestalt';
+import { Box, Column, Divider, Modal, Button, Text, Masonry, Spinner, Label } from './gestalt';
 import Navigation from './Navigation';
 import './App.css';
 import Heading from './Heading.js';
@@ -30,8 +30,21 @@ type Props = {|
 |};
 
 const { scaleUp, scaleDown } = transitions;
+
+var config = {
+
+  apiKey: "AIzaSyAB128CfHuYPGkJdsWbJMMBr52b2__GQDg",
+  authDomain: "chottky.firebaseapp.com",
+  databaseURL: "https://chottky.firebaseio.com",
+  projectId: "chottky",
+  storageBucket: "chottky.appspot.com",
+  messagingSenderId: "90082227758"
+
+};
+
 var firebase = require("firebase");
 //var GeoFire = require('geofire');
+
 
 class App extends React.Component {
 
@@ -73,23 +86,12 @@ class App extends React.Component {
       currentItems: [],
       finalArray: [],
       bottomLoader: false,
-      clickedCategory: 0
-
+      clickedCategory: 0,
+      userSignedIn: false,
+      photoURL: null
     };
 
-    var config = {
-
-      apiKey: "AIzaSyAB128CfHuYPGkJdsWbJMMBr52b2__GQDg",
-      authDomain: "chottky.firebaseapp.com",
-      databaseURL: "https://chottky.firebaseio.com",
-      projectId: "chottky",
-      storageBucket: "chottky.appspot.com",
-      messagingSenderId: "90082227758"
-
-    };
-
-
-    firebase.initializeApp(config)
+    firebase.initializeApp(config);
     this.onDismiss = this.onDismiss.bind(this);
     this.onClickMenu = this.onClickMenu.bind(this);
     this.isMenuOpen = this.isMenuOpen.bind(this);
@@ -107,8 +109,25 @@ class App extends React.Component {
     this.setLocationDisabled = this.setLocationDisabled.bind(this)
     this.handleScroll = this.handleScroll.bind(this);
     this.onClickCategory = this.onClickCategory.bind(this);
+    this.onClickProfile = this.onClickProfile.bind(this);
 
-  }
+
+
+    var self = this
+    var unsubscribe = firebase.auth().onAuthStateChanged(function (user) {
+
+      if(user)
+      {
+            console.log("user signed in")
+
+            self.setState({
+              userSignedIn: true,
+              photoURL: user.photoURL
+            })
+      }
+  })  
+
+}
 
   componentDidMount() {
     window.addEventListener("scroll", this.handleScroll);
@@ -144,7 +163,6 @@ class App extends React.Component {
 
       });
     }
-
 
     for (var i = 0; i < keys.length; i++) {
 
@@ -197,6 +215,11 @@ class App extends React.Component {
     }
   }
 
+
+  onClickProfile()
+  {
+      console.log("profile clicked")
+  }
 
   onClickSearchItem()
   {
@@ -325,7 +348,13 @@ class App extends React.Component {
 
   }
 
+
+
   onClickSideMenuItem(itemId) {
+
+
+      if (this.state.userSignedIn == false)
+       {
 
       if (itemId == 0) {
 
@@ -388,6 +417,102 @@ class App extends React.Component {
       )
     }
   }
+
+  else{
+
+    if (itemId == 0) {
+
+     // onclick MainPage
+    }
+
+   else if (itemId == 1)
+   {
+
+
+   }
+
+   else if (itemId == 2)
+   {
+
+
+   }
+
+   else if (itemId == 3){
+    
+    // here profile clicked
+    this.onClickProfile()
+
+   }
+
+  else if (itemId == 4)
+   {
+
+    toast("يمكنك التواصل معنا حاليا عبر وسائل التواصل الاجتماعي المتوافرة في اعلى القائمة", {
+      autoClose: 4000,
+      bodyClassName: "toastBody",
+    },
+    )
+
+   }
+
+   else if (itemId == 5)
+   {
+    this.onDismissMenu()
+    this.setState({
+      aboutUsClicked: true
+    })
+
+   
+   }
+
+   else if (itemId == 6)
+   {
+
+
+    this.onDismissMenu()
+    toast("!عذرا لا تتوفر وظائف شاغرة حاليا     ", {
+      autoClose: 4000,
+      bodyClassName: "toastBody",
+    },
+    )
+
+
+   
+   }
+
+   else if (itemId == 7)
+   {
+
+    this.onDismissMenu()
+    toast("!عذرا لا تتوفر سياسة الخصوصية حاليا     ", {
+      autoClose: 4000,
+      bodyClassName: "toastBody",
+    },
+    )
+
+    
+
+   }
+
+   else if (itemId == 8)
+   {
+    this.onDismissMenu()
+    toast("!عذرا شروط الاستخدام غير متوفرة حاليا      ", {
+      autoClose: 4000,
+      bodyClassName: "toastBody",
+    },
+    )
+
+
+   }
+
+   else if (itemId == 9)
+   {
+      firebase.auth().logout()
+   }
+
+  }
+}
 
   onClickDownloadFromItem() {
 
@@ -462,7 +587,11 @@ class App extends React.Component {
     return (
       <Column span={12} mdSpan={2}>
         <div className="fixed" onTouchMove={e => this.onTouchHeader(e)}>
-          <Heading onDismiss={this.onDismiss} onClickMenu={this.onClickMenu} />
+
+        {this.state.userSignedIn &&  (  <Heading imageSource = {this.state.photoURL} userSignedIn= {this.state.userSignedIn} onDismiss={this.onDismiss} onClickMenu={this.onClickMenu} />)}
+
+        {!this.state.userSignedIn &&  (  <Heading imageSource = {this.state.photoURL} userSignedIn= {this.state.userSignedIn} onDismiss={this.onDismiss} onClickMenu={this.onClickMenu} />)}
+
         </div>
         <Navigation onClickCategory = {this.onClickCategory}/>
       </Column>
@@ -567,6 +696,88 @@ class App extends React.Component {
       </div>
       )
     }
+  }
+
+  renderLoggedInSideMenu()
+  {
+
+    const socialMediaLogosStyle = {
+      width: "20px",
+      padding: "10px"
+    };
+
+    const menuItemsLabelStyle = {
+      marginTop: "20px",
+      fontSize: "12pt",
+      textAlign: "right",
+      fontWeight: "bold"
+    };
+
+    const userNameLabelStyle = {
+
+      marginLeft: "10px",
+      marginTop: "10px",
+      fontSize: "16pt",
+      textAlign: "left",
+      fontWeight: "bold"
+
+
+    }
+
+    return (
+
+      <Menu
+        isOpen={this.state.isSideMenuOpen}
+        right
+        width={'280px'}
+        customBurgerIcon={false}
+        onStateChange={(state) => this.handleStateChange(state)}
+      >
+
+        <Box display="block" marginTop={-7} marginLeft={-4}>
+          <img onClick style={socialMediaLogosStyle}
+            src={instagramLogo} onClick={() => this.onClickSocial("instagram")}
+          />
+          <img style={socialMediaLogosStyle}
+            src={twitterLogo} onClick={() => this.onClickSocial("twitter")}
+          />
+
+          <img onClick={() => this.onClickSocial("facebook")} style={socialMediaLogosStyle}
+            src={facebookLogo}
+          />
+        </Box>
+
+        <Box paddingY={0} paddingX={0} display="flex" flex="grow" marginTop={4} marginLeft={-2}
+        >
+          <img style = {{widht: '80px', height: '80px' }} className="profileLogo" onClick ={this.onClickProfile}
+                                 src={this.state.photoURL}/>
+            <label onClick = {this.onClickProfile} style = {userNameLabelStyle}>Radi Barq</label>
+        </Box>
+
+        <Box position="absolute" paddingY={0} marginTop={-2} marginRight={6} right={true} direction="column" display="flex" >
+
+          <label onClick = {() => this.onClickSideMenuItem(0)} style = {menuItemsLabelStyle}>تصفح</label>
+          <label onClick = {() => this.onClickSideMenuItem(1)} style = {menuItemsLabelStyle}>الاشعارات</label>
+          <label onClick={() => this.onClickSideMenuItem(2)} style={menuItemsLabelStyle}>
+          الرسائل</label>
+          <label onClick={() => this.onClickSideMenuItem(3)} style={menuItemsLabelStyle}>الصفحة الشخصية</label>
+          <label onClick={() => this.onClickSideMenuItem(4)} style={menuItemsLabelStyle}>
+            تواصل معنا
+                 </label>
+          <label onClick={() => this.onClickSideMenuItem(5)} style={menuItemsLabelStyle}>
+            عن جايلك</label>
+          <label onClick={() => this.onClickSideMenuItem(6)} style={menuItemsLabelStyle}>
+            وظائف</label>
+          <label onClick={() => this.onClickSideMenuItem(7)} style={menuItemsLabelStyle}>
+            سياسة الخصوصية</label>
+          <label onClick={() => this.onClickSideMenuItem(8)} style={menuItemsLabelStyle}>
+            شروط الاستخدام</label>
+            <label onClick={() => this.onClickSideMenuItem(9)} style={menuItemsLabelStyle}>تسجيل الخروج</label>
+
+        </Box>
+      </Menu>
+    )
+
   }
 
   renderSideMenu() {
@@ -738,7 +949,7 @@ class App extends React.Component {
           <Box paddingX={6} paddingY={1} >
             <div style={downloadLabelStyle}>
               جايلك يمكنك من بيع و شراء المنتجات بكل سهولة وبتجربة ممتعة حمل تطبيق جايلك الآن
-       </div>
+           </div>
           </Box>
         </Modal>
       </div>
@@ -816,9 +1027,14 @@ class App extends React.Component {
         <Box marginTop={0} mdDisplay="flex" direction="row"
         >
           <ToastContainer hideProgressBar={true} />
-          {this.state.isSideMenuOpen && (
+          {this.state.isSideMenuOpen && !this.state.userSignedIn && (
             this.renderSideMenu()
           )}
+
+           {this.state.isSideMenuOpen && this.state.userSignedIn && (
+            this.renderLoggedInSideMenu()
+          )}
+
 
           <GeoLocation setLocationDisabled={this.setLocationDisabled} setLocationEnabled={this.setLocationEnabled} getItems={this.getItems} />
 
@@ -835,12 +1051,12 @@ class App extends React.Component {
 
           {this.state.loginClicked &&
 
-            (<LoginContent onDismissAboutUs={this.onDismissLogin} />)
+            (<LoginContent firebase = {firebase} onDismissAboutUs={this.onDismissLogin} />)
           }
 
           {this.state.signUpClicked &&
 
-            (<SignUpContent onDismissAboutUs={this.onDismissSignUp} />)
+            (<SignUpContent firebase = {firebase} onDismissAboutUs={this.onDismissSignUp} />)
           }
 
           
@@ -850,9 +1066,14 @@ class App extends React.Component {
           )
 
           }
-          {
+
+          { this.state.userSignedIn &&(
             this.renderHeader()
-          }
+          )}
+
+           { !this.state.userSignedIn &&(
+            this.renderHeader()
+          )}
 
           <div className="content"   >
             {

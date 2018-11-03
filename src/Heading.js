@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box, Text, Icon, Link as GestaltLink, SearchField, IconButton, Label, Link, Modal, Button, Devider } from './gestalt';
+import { Box, Text, Icon, Link as GestaltLink, SearchField, IconButton, Label, Link, Modal, Button, Devider, Avatar} from './gestalt';
 import NavLink from './NavLink';
 import Logo from './images/gayelak-svg.svg'
 import './Heading.css'
@@ -7,6 +7,7 @@ import './Heading.css'
 class Heading extends React.Component {
 
     constructor(props) {
+
         super(props);
         this.state = {value: ''}
         this.keyPress = this.keyPress.bind(this);
@@ -42,12 +43,16 @@ class Heading extends React.Component {
 
         }
 
+        console.log(this.props.imageSource)
+
         return (<div className="header">
             <Box marginTop={0} color="white" shape="rounded" padding={1} display="flex" direction="row" alignItems="center">
+
                 <Box paddingY={0} >
+
                     <img style = {brandLogoImage} className="brandLogo" 
-                        src={Logo}
-                    />
+                    src={Logo}/>
+
                 </Box>
 
                 <Box flex="grow" paddingX={2} onKeyDown={this.keyPress}>
@@ -67,7 +72,15 @@ class Heading extends React.Component {
                     </Box>
                 </Box>
                 <Box paddingX={0}>
-                    <IconButton onClick ={() => this.props.onClickMenu()} className="moreIcon" accessibilityLabel="Profile" icon="ellipsis" size="md" iconColor="black" />
+                {this.props.userSignedIn && (
+
+                      <img style = {{widht: '40px', height: '40px' }} className="profileLogo"  onClick ={() => this.props.onClickMenu()}
+                                 src={this.props.imageSource}/>)}
+
+                    {!this.props.userSignedIn && (
+
+                            <IconButton onClick ={() => this.props.onClickMenu()} className="moreIcon" accessibilityLabel="Profile" icon="ellipsis" size="md" iconColor="black" />)}
+                        
                 </Box>
             </Box>
         </div>
