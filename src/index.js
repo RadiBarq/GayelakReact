@@ -1,5 +1,5 @@
 import React from 'react';
-import { HashRouter, Route, Switch } from 'react-router-dom';
+import { HashRouter, Route, Switch, Router } from 'react-router-dom';
 import ReactDOM from 'react-dom';
 import { render } from 'react-dom';
 import './index.css';
@@ -18,22 +18,7 @@ const container = document.getElementById('root');
 
 if (container instanceof Element) {
     ReactDOM.render(
-
-      <Profile />,
-      // <Chat />,
-      // <HashRouter>
-      //   <App>
-      //     <Switch>
-      //       {Object.keys(routes).map(pathname => (
-      //         <Route
-      //           path={`/${pathname}`}
-      //           key={pathname}
-      //           render={() => <CardPage cards={routes[pathname]} />}
-      //         />
-      //       ))}
-      //     </Switch>
-      //   </App>
-      // </HashRouter>,
+<App/>,
       container
     );
   } else {

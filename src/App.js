@@ -5,6 +5,7 @@ import './App.css';
 import Heading from './Heading.js';
 import './Heading.css'
 import { slide as Menu } from 'react-burger-menu'
+import Profile from './Profile'
 import MobileStoreButton from 'react-mobile-store-button'
 import instagramLogo from './images/instagram-logo.svg';
 import facebookLogo from './images/facebook-logo.svg';
@@ -20,6 +21,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import AboutUsContent from './AboutUsContent';
 import Geofire from 'geofire';
 import GeoLocation from './GeoLocation'
+import { HashRouter, Route, Switch,Link, BrowserRouter as Router} from 'react-router-dom';
 
 import { geolocated } from 'react-geolocated';
 import LoginContent from './LoginContent';
@@ -624,7 +626,7 @@ class App extends React.Component {
 
         const itemId = i
         gridItems.push(<GridItem price={this.state.items[i].price} itemId={i} imageId={this.state.finalArray[i]} onDismissImage={() => this.onDismissImage(itemId)} />)
-
+        
       }
 
       return (
@@ -642,7 +644,6 @@ class App extends React.Component {
             }
             columnWidth={230}
           >
-
             {
               gridItems
             }
@@ -760,7 +761,17 @@ class App extends React.Component {
           <label onClick = {() => this.onClickSideMenuItem(1)} style = {menuItemsLabelStyle}>الاشعارات</label>
           <label onClick={() => this.onClickSideMenuItem(2)} style={menuItemsLabelStyle}>
           الرسائل</label>
-          <label onClick={() => this.onClickSideMenuItem(3)} style={menuItemsLabelStyle}>الصفحة الشخصية</label>
+          <label  onClick={() => this.onClickSideMenuItem(3)} style={menuItemsLabelStyle}>
+
+            <Router>
+             <Link to = "/Profile">الصفحة الشخصية</Link>
+
+                <Switch>
+                  <Route path="/Profile" component={Profile} />
+                </Switch>
+             </Router>
+        
+          </label>
           <label onClick={() => this.onClickSideMenuItem(4)} style={menuItemsLabelStyle}>
             تواصل معنا
                  </label>
@@ -1022,7 +1033,15 @@ class App extends React.Component {
 
     return (
 
+    
       <Box minHeight="100vh" onScroll={this.handleScroll}>
+
+       <Router>
+        
+        <Switch>
+        <Route path="/Profile" component={Profile} />
+        </Switch>
+        </Router>
 
         <Box marginTop={0} mdDisplay="flex" direction="row"
         >
