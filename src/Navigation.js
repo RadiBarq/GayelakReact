@@ -6,7 +6,6 @@ import routes from './routes';
 import './Navigation.css';
 import ReactList from 'react-list';
 import { isAndroid, isIOS, BrowserView, MobileView, isMobile, isBrowser, isTablet, isSmartTV } from 'react-device-detect';
-
 //import './Header.css';
 const components = Object.keys(routes);
 

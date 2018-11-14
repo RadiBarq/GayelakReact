@@ -12,13 +12,11 @@ class AboutUsContent extends React.Component {
 
     constructor(props) {
 
-        super(props)
-        
+        super(props)   
     }
     
     render() {
         return (
-
             <div className = "aboutUsModal">
             
             <Modal

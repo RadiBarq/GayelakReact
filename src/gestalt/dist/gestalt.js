@@ -1995,7 +1995,7 @@ function Container(props) {
     { justifyContent: 'center', display: 'flex' },
     React.createElement(
       Box,
-      { maxWidth: 800, width: '100%' },
+      { maxWidth: 200, width: '100%' },
       children
     )
   );

@@ -117,7 +117,10 @@ class SignUpContent extends React.Component {
                         Email: email,
                         UserId: uid,
                         UserName: self.state.userNameValue,
-                        isFacebookVerified: false
+                        isFacebookVerified: false,
+                        numberOfRaters: 0,
+                        overallRating: 0,
+                        city: "Nablus"
                     }).then(function() {
 
 

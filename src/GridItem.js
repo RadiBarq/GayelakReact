@@ -30,7 +30,6 @@ class GridItem extends React.Component {
             opacity: "1",
             objectFit: "cover",
             borderRadius: "15px"
-
         }
 
         const tempImageStyle = {
@@ -53,7 +52,6 @@ class GridItem extends React.Component {
                         {
                             <img className="gridImage" style={imageStyle} src={this.state.imageUrl} />
                         }
-
 
                         <div className="middle">
                             <div className="text">{this.props.price}</div>
