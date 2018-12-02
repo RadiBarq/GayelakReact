@@ -9,6 +9,7 @@
     "react": "^16.4.0",
     "react-burger-menu": "^2.5.2",
     "react-dom": "^16.4.0",
+    "react-dropzone": "^7.0.1",
     "react-geolocated": "^2.4.0",
     "react-highlight": "^0.12.0",
     "react-marked": "^0.3.1",

@@ -256,7 +256,7 @@ class Profile extends React.Component {
                 showConfirmationMessage: true,
                 confirmationLabel: error.message,
                 changeEmailValue: " "
-
+                
             })
 
         });
@@ -359,7 +359,7 @@ class Profile extends React.Component {
             return (
                 <ItemContent onClickDownload={this.onClickDownloadFromItem} distanceUnit={"km"} distance={"200"} itemId={this.state.favouriteArray[this.state.clickedImageId]} item={this.state.favouriteItemsContent[this.state.clickedImageId]} onDismissImage={this.onDismissImage} />)
         }
-
+        
     }
 
     getUserData() {
@@ -478,8 +478,6 @@ class Profile extends React.Component {
                         }
 
                     </StackGrid>
-
-
                 </div>
 
             )
@@ -906,10 +904,7 @@ class Profile extends React.Component {
                     </Box>
                 </Box>
             </Container>
-
         )
-
-
     }
 
     renderChangePicture() {

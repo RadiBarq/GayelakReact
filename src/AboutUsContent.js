@@ -8,6 +8,7 @@ import testAvatar from './images/face_1.jpg'
 import { width } from 'window-size';
 import image from './images/about-us-image.jpg'
 
+
 class AboutUsContent extends React.Component {
 
     constructor(props) {

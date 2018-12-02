@@ -120,8 +120,7 @@ class Navigation extends React.Component {
     if (isMobile && !isTablet) {
       return (
 
-        <div className="fixedBlock">
-
+        <div className="fixedBlockMobile">
           <Box
             display="flex"
             position="absolute"
@@ -252,7 +251,7 @@ class Navigation extends React.Component {
     const navigationItems = ["الرياضة و الالعاب", "اغراض اخرى", "افلام، كتب و اغاني", "الاطفال", "ملابس و اكسسوارات", "حيوانات", "البيت و الحديقة", "شقق و اراضي", "الكترونيات", "سيارات"]
 
     const menuItemsSmallLabelStyle = {
-
+      
       fontSize: "6pt",
       fontWeight: "bold",
       marginRight: "7.5px",

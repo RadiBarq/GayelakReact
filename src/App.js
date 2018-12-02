@@ -20,19 +20,18 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AboutUsContent from './AboutUsContent';
 import Geofire from 'geofire';
-
 import GeoLocation from './GeoLocation'
-import { HashRouter, Route, Switch,Link, BrowserRouter as Router, NavLink} from 'react-router-dom';
+import { HashRouter, Route, Switch, Link, BrowserRouter as Router, NavLink } from 'react-router-dom';
 import { geolocated } from 'react-geolocated';
 import LoginContent from './LoginContent';
 import SignUpContent from './SignUpContent';
+
 
 type Props = {|
   children?: React.Node,
 |};
 
 const { scaleUp, scaleDown } = transitions;
-
 
 var config = {
 
@@ -44,23 +43,19 @@ var config = {
   messagingSenderId: "90082227758"
 };
 
-
-
 var firebase = require("firebase");
-
 //var GeoFire = require('geofire');
-
 
 class App extends React.Component {
 
   constructor(props) {
-
     super(props)
+
     this.state = {
 
       isDownloadModalOpen: false,
       loginClicked: false,
-      signUpClicked : false,
+      signUpClicked: false,
       isSideMenuOpen: false,
       gridItemsChanged: true,
       isImageClicked: false,
@@ -84,7 +79,7 @@ class App extends React.Component {
       booksCategoryArray: [],
       otherCategoryArray: [],
       itemsCurrentSize: 0,
-      maxRadius: 15,
+      maxRadius: 50,
       lat: 0,
       long: 0,
       enableBottomScrolling: false,
@@ -92,15 +87,15 @@ class App extends React.Component {
       finalArray: [],
       bottomLoader: false,
       clickedCategory: 0,
+      locationReady: false,
       userSignedIn: false,
-      photoURL: null  
+      photoURL: null,
+      searchClicked: false
     };
 
     this.onDismiss = this.onDismiss.bind(this);
-
     this.onTouchHeader = this.onTouchHeader.bind(this);
     this.onDismissImage = this.onDismissImage.bind(this);
-
     this.getItems = this.getItems.bind(this);
     this.itemsReady = this.itemsReady.bind(this);
     this.renderLargeGrid = this.renderLargeGrid.bind(this);
@@ -109,20 +104,29 @@ class App extends React.Component {
     this.setLocationDisabled = this.setLocationDisabled.bind(this)
     this.handleScroll = this.handleScroll.bind(this);
     this.onClickCategory = this.onClickCategory.bind(this);
-        
+    this.renderLocation = this.renderLocation.bind(this);
+    this.onClickSearch = this.onClickSearch.bind(this)
+    this.searchQuery = this.searchQuery.bind(this)
     var self = this
+
+   // firebase.auth().signOut()
+  //  console.log(firebase.auth().cu.photoURL)
 
   }
 
-
-  
   componentDidMount() {
+
     window.addEventListener("scroll", this.handleScroll);
+    this.renderLocation()
+    this.props.onRef(this)
+
   }
 
   componentWillUnmount() {
 
     window.removeEventListener("scroll", this.handleScroll);
+    this.props.onRef(undefined)
+
   }
 
   itemsReady(keys, dist, distUnits, lat, long) {
@@ -132,9 +136,7 @@ class App extends React.Component {
     var self = this
     var itms = []
 
-
-    if (keys.length == 0)
-    {
+    if (keys.length == 0) {
       self.setState({
 
         items: self.state.items.concat(itms),
@@ -153,12 +155,13 @@ class App extends React.Component {
 
     for (var i = 0; i < keys.length; i++) {
 
-        firebase.database().ref('/items/' + keys[i]).once('value').then(function (snapshot) {
+      firebase.database().ref('/items/' + keys[i]).once('value').then(function (snapshot) {
 
         var price = snapshot.val().price
-
         if (price != "غير محدد") {
+
           price = snapshot.val().price + snapshot.val().currency
+
         }
 
         var description = snapshot.val().description
@@ -167,18 +170,27 @@ class App extends React.Component {
         var title = snapshot.val().title
         var imagesCount = snapshot.val().imagesCount
 
-          itms.push({
+        itms.push({
 
-            price: price,
-            description: description,
-            displayName: displayName,
-            itemUserId: itemUserId,
-            title: title,
-            imagesCount: imagesCount
+          price: price,
+          description: description,
+          displayName: displayName,
+          itemUserId: itemUserId,
+          title: title,
+          imagesCount: imagesCount
 
-          })
+        })
 
         if (counter == keys.length - 1) {
+
+          if (self.state.searchClicked == true)
+          {
+             // searchQuery()  
+    
+          }
+
+          else
+          {
 
           self.setState({
 
@@ -195,39 +207,68 @@ class App extends React.Component {
 
           });
         }
-        
+      }
         counter = counter + 1
 
       });
-    } 
+    }
   }
 
-  onClickProfile()
+  searchQuery()
   {
-      console.log("profile clicked")
+
+
+
+
   }
 
-  onClickSearchItem()
-  {
-    console.log("search item clicked")
+  onClickProfile() {
+
+    console.log("profile clicked")
+
+  }
+
+  onClickSearch(string)
+  {   
+    var searchKeys = string.toLowerCase().split(" ")
+    this.setState({
+
+      searchClicked: true,
+      finaleArray: [],
+      radius: 0.2,
+      items: []
+
+    })
+
+    this.getItems(this.state.lat, this.state.long)
 
   }
 
   getItems(lat, long) {
-    
-    var firebaseRef = firebase.database().ref()
-    var categoryHash = {10:"category-others" , 9:"category-sports", 8:"category-books", 7:"category-kids" ,6:"category-clothes" , 5:"category-dog", 4:"cateogry-home", 3:"category-aparment", 2:"phone-category", 1:"category-car"}
-    console.log(this.state.clickedCategory)
-    console.log(this.state.items)
 
-    if (this.state.clickedCategory == 0)
-    {
-       firebaseRef = firebaseRef.child("items-location")
+    var firebaseRef = firebase.database().ref()
+    var categoryHash = { 10: "category-others", 9: "category-sports", 8: "category-books", 7: "category-kids", 6: "category-clothes", 5: "category-dog", 4: "cateogry-home", 3: "category-aparment", 2: "phone-category", 1: "category-car" }
+    //console.log(this.state.clickedCategory)
+    //console.log(this.state.items)
+    // console.log("lat is: " + lat, "long is: "+ long)
+    // console.log(this.state.currentRadius)
+
+    this.setState({
+
+        lat: lat,
+        long: long
+
+    })
+
+    // this.setState({locationReady: true})
+    if (this.state.clickedCategory == 0) {
+      firebaseRef = firebaseRef.child("items-location")
     }
 
-    else
-    {
+    else {
+
       firebaseRef = firebaseRef.child("categories-location").child(categoryHash[this.state.clickedCategory])
+
     }
 
     var geoFire = new Geofire(firebaseRef)
@@ -260,6 +301,7 @@ class App extends React.Component {
       }
 
       self.state.itemsKey.push(key)
+      console.log(key)
       self.state.distances.push(distance)
       dist.push(distance)
 
@@ -281,12 +323,12 @@ class App extends React.Component {
           distUnits: [],
           distances: [],
           itemsKey: [],
-          currentRadius: self.state.currentRadius + 0.5
+          currentRadius: self.state.currentRadius + 2
 
-        } ,  () => {
+        }, () => {
 
-          self.getItems(self.state.lat, self.state.long)
-      });
+          self.getItems(lat, long)
+        });
 
       }
 
@@ -299,15 +341,13 @@ class App extends React.Component {
     });
   }
 
-
   onDismiss = () => {
 
     this.setState({
       isDownloadModalOpen: !this.state.isDownloadModalOpen
     });
+
   }
-
-
 
   onClickDownloadFromItem() {
 
@@ -331,18 +371,14 @@ class App extends React.Component {
   }
 
   renderHeader() {
-    return (  <Column span={12} mdSpan={2}>
-        <Navigation onClickCategory = {this.onClickCategory}/>
-      </Column>
+    return (<Column span={12} mdSpan={2}>
+      <Navigation onClickCategory={this.onClickCategory} />
+    </Column>
     )
   }
-
   handleStateChange(state) {
-
     this.setState({ isSideMenuOpen: state.isOpen })
-    
   }
-
 
   renderLargeGrid() {
 
@@ -357,7 +393,7 @@ class App extends React.Component {
 
         const itemId = i
         gridItems.push(<GridItem price={this.state.items[i].price} itemId={i} imageId={this.state.finalArray[i]} onDismissImage={() => this.onDismissImage(itemId)} />)
-        
+
       }
 
       return (
@@ -417,7 +453,7 @@ class App extends React.Component {
           {
             gridItems
           }
-      
+
 
         </StackGrid>
 
@@ -430,10 +466,9 @@ class App extends React.Component {
     }
   }
 
-  onClickCategory(key)
-  {
+  onClickCategory(key) {
 
-    window.scrollTo(0, 0)   
+    window.scrollTo(0, 0)
     console.log(key)
 
     this.setState({
@@ -451,12 +486,12 @@ class App extends React.Component {
       bottomLoader: false,
       enableBottomScrolling: false
 
-    },  () => {
+    }, () => {
 
       this.getItems(this.state.lat, this.state.long)
-  });
+    });
 
-}
+  }
 
   setLocationEnabled() {
     this.setState(
@@ -495,11 +530,11 @@ class App extends React.Component {
           itemsKey: [],
           bottomLoader: true
 
-        },  () => {
+        }, () => {
 
-        this.getItems(this.state.lat, this.state.long)
+          this.getItems(this.state.lat, this.state.long)
 
-    });
+        });
 
       } else {
 
@@ -511,6 +546,29 @@ class App extends React.Component {
       // not the bottom
     }
   }
+
+
+  renderLocation() {
+
+    return (
+      <div>
+        {
+          !this.props.isGeolocationAvailable
+            ? <div>Your browser does not support Geolocation</div>
+            : !this.props.isGeolocationEnabled
+              ? <div>Geolocation is not enabled</div>
+              : this.props.coords && !this.state.locationReady 
+                ? 
+
+                this.setState({locationReady: true, lat: this.props.coords.latitude, long: this.props.coords.longitude})
+        
+                : <div></div>
+        }
+
+      </div>
+    )
+  }
+
 
   render() {
 
@@ -526,7 +584,6 @@ class App extends React.Component {
     };
 
     const sideMenuDonwloadLabelStyle = {
-      
       fontWeight: "bold",
       color: "black",
       fontSize: "16pt",
@@ -534,11 +591,9 @@ class App extends React.Component {
       overflow: "hidden",
       textOverflow: "ellipsis",
       textAlign: "right"
-
     };
 
     return (
-
       <Box minHeight="100vh" onScroll={this.handleScroll}>
 
         <Box marginTop={0} mdDisplay="flex" direction="row"
@@ -552,17 +607,21 @@ class App extends React.Component {
 
           )}
 
-         {this.renderHeader()}
-            
+          {this.renderHeader()}
+
           {isDownloadModalOpen && (
 
             this.renderDownloadModal()
           )
-          
           }
+
+          {/* {this.state.locationReady &&(
+            this.getItems(this.props.coords.latitude, this.props.coords.longitude)
+          )} */}
 
           <div className="content" >
             {
+
               this.state.areItemsReady && (
                 this.renderLargeGrid()
               )}
@@ -570,9 +629,12 @@ class App extends React.Component {
             <Box marginTop={12}>
 
               <Spinner show={!this.state.areItemsReady} accessibilityLabel="Loading Spinner" />
-              {!this.state.isLocationAvailable && (
+
+               {/* {this.renderLocation()} */}
+
+              {/* {!this.state.isLocationAvailable && (
                 <h3 style={{ marginLeft: "30%", marginRight: "30%", textAlign: "center" }}> !الرجاء تفعيل خدمة المواقع في المتصفح</h3>
-              )}
+              )} */}
 
             </Box>
           </div>
@@ -581,7 +643,12 @@ class App extends React.Component {
       </Box>
     );
   }
-
 }
-export default App
+export default geolocated({
+
+  positionOptions: {
+    enableHighAccuracy: true,
+  },
+  userDecisionTimeout: 5000,
+})(App);
 

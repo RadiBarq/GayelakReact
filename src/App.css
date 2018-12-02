@@ -61,13 +61,13 @@
 
 .imageModal
 {
-    z-index: 100;
+    z-index: 1000;
     position: fixed;
 }
 
 .downloadModal
 {
-  z-index: 100;
+  z-index: 1000;
   position: fixed;
 }
 

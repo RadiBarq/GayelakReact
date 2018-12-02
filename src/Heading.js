@@ -12,8 +12,11 @@ import LoginContent from './LoginContent';
 import { HashRouter, Route, Switch, HashRouter as Router, NavLink} from 'react-router-dom';
 import Profile from './Profile'
 import SignUpContent from './SignUpContent';
+import UploadFileModal from './UploadFileModal'
 import Logo from './images/gayelak-svg.svg'
 import Notifications from './Notifications'
+import AboutUs from './AboutUs'
+import GeoLocation from './GeoLocation'
 import App from './App'
 import './Heading.css'
 
@@ -25,6 +28,7 @@ var config = {
     projectId: "chottky",
     storageBucket: "chottky.appspot.com",
     messagingSenderId: "90082227758"
+
   };
 
 var firebase = require("firebase");
@@ -33,16 +37,20 @@ class Heading extends React.Component {
 
     constructor(props) {
 
-        super(props);
-        this.state = {value: '',
-        photoURL: null,
-        userSignedIn: false,
-        isSideMenuOpen: false,
-        loginClicked: false,
-        aboutUsClicked: false,
-        signUpClicked: false,
-        isDownloadModalOpen: false,
-        currentNavigationItem: 0
+          super(props);
+
+          this.state = {value: '',
+          photoURL: null,
+          userSignedIn: false,
+          isSideMenuOpen: false,
+          loginClicked: false,
+          aboutUsClicked: false,
+          signUpClicked: false,
+          isDownloadModalOpen: false,
+          currentNavigationItem: 0,
+          searchButtonClicked: false,
+          uploadFileClicked: false
+
         }
 
         this.onClickMenu = this.onClickMenu.bind(this);
@@ -58,8 +66,10 @@ class Heading extends React.Component {
         this.onDismissAboutUs = this.onDismissAboutUs.bind(this)
         this.renderDownloadModal = this.renderDownloadModal.bind(this)
         this.navigationClicked = this.navigationClicked.bind(this)
+        this.onSearchClicked = this.onSearchClicked.bind(this)
+        this.onDismissUploadFile = this.onDismissUploadFile.bind(this)
+      
         this.onDismiss = this.onDismiss.bind(this)
-
         var self = this
         this.keyPress = this.keyPress.bind(this);
         firebase.initializeApp(config);
@@ -69,6 +79,7 @@ class Heading extends React.Component {
             {
                   console.log("user signed in")
                   console.log(user.displayName)
+                  console.log(user.photoURL)
                   self.setState({
                     userSignedIn: true,
                     photoURL: user.photoURL
@@ -83,7 +94,7 @@ class Heading extends React.Component {
         this.setState({
           isDownloadModalOpen: !this.state.isDownloadModalOpen
         });
-    
+
       }
 
     onClickSocial = (socialNetwork) => {
@@ -133,6 +144,15 @@ class Heading extends React.Component {
     
       }
 
+    onDismissUploadFile()
+    {
+
+      this.setState({
+        uploadFileClicked: !this.state.uploadFileClicked
+      })
+
+    }
+
       renderDownloadModal() {
 
         const downloadLabelStyle = {
@@ -141,9 +161,8 @@ class Heading extends React.Component {
           fontSize: "14px",
           fontWeight: "bold",
           textAlign: "right"
-
         };
-    
+
         return (
     
           <div className="downloadModal">
@@ -203,32 +222,32 @@ class Heading extends React.Component {
         )
       }
 
-
       isMenuOpen = function (state) {
         this.setState({
-          
           isSideMenuOpen: state.isOpen,
           gridItemsChanged: false
-
-
         });
       };
 
       handleStateChange(state) {
 
-        this.setState({ isSideMenuOpen: state.isOpen })
-        
+        this.setState({isSideMenuOpen: state.isOpen })  
+
       }
 
-        onDismissLogin()
+    onSearchClicked(string)
+      {
+          // var searchKeys = string.toLowerCase().split(" ")
+          this.child.onClickSearch(string) 
+
+      }
+      onDismissLogin()
         {
             this.setState({
                 loginClicked: !this.state.loginClicked
               })
-
         }
-
-
+        
         onDismissAboutUs() {
 
             this.setState({
@@ -275,9 +294,9 @@ class Heading extends React.Component {
       fontWeight: "bold"
     }
 
-
     return (
-
+    
+      <div className = "fixed">
       <Menu
         isOpen={this.state.isSideMenuOpen}
         right
@@ -310,33 +329,38 @@ class Heading extends React.Component {
 
           <label onClick = {this.onDismissMenu} style = {menuItemsLabelStyle}> <NavLink to = "/">تصفح</NavLink>
           </label>
-          <label onClick = {() => this.onClickSideMenuItem(1)} style = {menuItemsLabelStyle}>
+
+
+          <label onClick={() => this.onClickSideMenuItem(1)} style={menuItemsLabelStyle}>
+              بيع منتجاتك</label>
+
+          <label onClick = {() => this.onClickSideMenuItem(2)} style = {menuItemsLabelStyle}>
              <NavLink to = "/notifications">الاشعارات</NavLink>
             </label>
-          <label onClick={() => this.onClickSideMenuItem(2)} style={menuItemsLabelStyle}>
+          <label onClick={() => this.onClickSideMenuItem(3)} style={menuItemsLabelStyle}>
           الرسائل</label>
           <label  onClick={this.onDismissMenu} style={menuItemsLabelStyle}>
           <NavLink to = "/profile">الصفحة الشخصية</NavLink>
           </label>
-          <label onClick={() => this.onClickSideMenuItem(4)} style={menuItemsLabelStyle}>
+          <label onClick={() => this.onClickSideMenuItem(5)} style={menuItemsLabelStyle}>
             تواصل معنا
                  </label>
-          <label onClick={() => this.onClickSideMenuItem(5)} style={menuItemsLabelStyle}>
-            عن جايلك</label>
           <label onClick={() => this.onClickSideMenuItem(6)} style={menuItemsLabelStyle}>
-            وظائف</label>
+          <NavLink to = "/aboutus"> عن جايلك</NavLink></label>
           <label onClick={() => this.onClickSideMenuItem(7)} style={menuItemsLabelStyle}>
-            سياسة الخصوصية</label>
+            وظائف</label>
           <label onClick={() => this.onClickSideMenuItem(8)} style={menuItemsLabelStyle}>
+            سياسة الخصوصية</label>
+          <label onClick={() => this.onClickSideMenuItem(9)} style={menuItemsLabelStyle}>
             شروط الاستخدام</label>
-            <label onClick={() => this.onClickSideMenuItem(9)} style={menuItemsLabelStyle}>تسجيل الخروج</label>
+            <label onClick={() => this.onClickSideMenuItem(10)} style={menuItemsLabelStyle}>تسجيل الخروج</label>
 
         </Box>
       </Menu>
+      </div>
     )
 
   }
-
 
       renderSideMenu() {
 
@@ -353,7 +377,7 @@ class Heading extends React.Component {
         };
     
         return (
-    
+          <div className = "fixed">
           <Menu
             isOpen={this.state.isSideMenuOpen}
             right
@@ -398,6 +422,7 @@ class Heading extends React.Component {
     
             </Box>
           </Menu>
+          </div>
         )
       }
 
@@ -431,9 +456,8 @@ class Heading extends React.Component {
         },
         )
       }
-  
       else if (itemId == 3) {
-  
+
         this.onDismissMenu()
         this.setState({
           aboutUsClicked: true
@@ -476,27 +500,37 @@ class Heading extends React.Component {
   
        // onclick MainPage
       }
-  
-     else if (itemId == 1)
-     {
-  
-  
-     }
+
+
+    else if (itemId == 1)
+    {
+      this.onDismissMenu()
+      this.setState({
+        uploadFileClicked: true
+      })
+    }
   
      else if (itemId == 2)
      {
+
+
+  
+     }
+  
+     else if (itemId == 3)
+     {
   
   
      }
   
-     else if (itemId == 3){
+     else if (itemId == 4){
       
       // here profile clicked
       this.onClickProfile()
      
      }
   
-    else if (itemId == 4)
+    else if (itemId == 5)
      {
   
       toast("يمكنك التواصل معنا حاليا عبر وسائل التواصل الاجتماعي المتوافرة في اعلى القائمة", {
@@ -507,7 +541,7 @@ class Heading extends React.Component {
   
      }
   
-     else if (itemId == 5)
+     else if (itemId == 6)
      {
       this.onDismissMenu()
       this.setState({
@@ -517,7 +551,7 @@ class Heading extends React.Component {
      
      }
   
-     else if (itemId == 6)
+     else if (itemId == 7)
      {
   
   
@@ -530,7 +564,7 @@ class Heading extends React.Component {
 
      }
   
-     else if (itemId == 7)
+     else if (itemId == 8)
      {
   
       this.onDismissMenu()
@@ -540,11 +574,9 @@ class Heading extends React.Component {
       },
       )
   
-      
-  
      }
   
-     else if (itemId == 8)
+     else if (itemId == 9)
      {
       this.onDismissMenu()
       toast("!عذرا شروط الاستخدام غير متوفرة حاليا      ", {
@@ -552,11 +584,10 @@ class Heading extends React.Component {
         bodyClassName: "toastBody",
       },
       )
-  
-  
+
      }
   
-     else if (itemId == 9)
+     else if (itemId == 10)
      {
         firebase.auth().signOut()
      }
@@ -564,26 +595,15 @@ class Heading extends React.Component {
     }
   }
 
-
-    keyPress(e){
-
-        if(e.keyCode == 13){
-        console.log(this.state.value)
-        }
-
-     }
-
      navigationClicked(){
 
         return(
-
         <Switch>
-            {this.state.navigationClicked == 0 &&( <Route path="/" component={App} />)}
-            {this.state.navigationClicked == 0 &&( <Route path = "/profile" render={() => <h1>Page not found</h1>}/>)}  
+            {this.state.navigationClicked == 0 &&( <Route path="/" render={()=><App onRef={ref => (this.child = ref)}/>}/>)}
+            {this.state.navigationClicked == 0 &&(<Route path = "/profile" render={() => <h1>Page Not Found</h1>}/>)}  
         </Switch>)
 
      }
-
 
     onTouchMove(event) {
 
@@ -596,13 +616,12 @@ class Heading extends React.Component {
       }
 
     componentDidMount () {
-        
+
     }
 
     keyPress(e){
         if(e.keyCode == 13){
-          console.log(this.state.value)
-           // put the login here
+           this.onSearchClicked(this.state.value)
         }
      }
      
@@ -611,7 +630,7 @@ class Heading extends React.Component {
         const brandLogoImage = {
 
         }
-  
+
         const { isDownloadModalOpen } = this.state;
         return (
 
@@ -630,9 +649,15 @@ class Heading extends React.Component {
           )}
 
            {this.state.aboutUsClicked &&
-
+          
 (<AboutUsContent onDismissAboutUs={this.onDismissAboutUs} />)
 }
+
+
+
+{this.state.uploadFileClicked && (
+  <UploadFileModal onDismissUploadFile = {this.onDismissUploadFile} />
+)}
 
 {this.state.loginClicked &&
 
@@ -647,25 +672,24 @@ class Heading extends React.Component {
  {isDownloadModalOpen && (
 
         this.renderDownloadModal())
- }
 
+ }
 
             <Box marginTop={0} color="white" shape="rounded" padding={1} display="flex" direction="row" alignItems="center">
 
                 <Box paddingY={0} >
-
                     <img style = {brandLogoImage} className="brandLogo" 
                     src={Logo}/>
-
                 </Box>
 
                 <Box flex="grow" paddingX={2} onKeyDown={this.keyPress}>
                     <SearchField
                         accessibilityLabel="ابحث في جايلك"
                         id="searchField"
-                      
-                        onChange={({ value }) => this.setState({ value })}
+                        onChange={({
+                        value}) => this.setState({value})}
                         value = {this.state.value}
+                        
                     />
                 </Box>
                 <Box paddingX={2}>
@@ -692,11 +716,13 @@ class Heading extends React.Component {
             </div>
 
             <Box> 
-              <Route  exact path="/" component={App}>
+              <Route  exact path="/" render={()=><App onRef={ref => (this.child = ref)} />}>
               </Route>    
               <Route path = "/profile" component = {Profile}/>
               <Route path = "/notifications" component = {Notifications}/>
-                      
+              <Route path = "/aboutus"  component = {AboutUs} />
+
+              
               {/* <Route exact path="/profile/username" component={App} />
               <Route exact path="/profile/email" component={App} />
               <Route exact path="/profile/password" component={App} />
@@ -704,7 +730,6 @@ class Heading extends React.Component {
             </Box>
         </div>
         </Router>
-  
 
         )
     }
