@@ -346,9 +346,9 @@ class App extends React.Component {
     this.setState({
       isDownloadModalOpen: !this.state.isDownloadModalOpen
     });
-
   }
 
+  
   onClickDownloadFromItem() {
 
     this.onDismissImage()
@@ -362,7 +362,7 @@ class App extends React.Component {
 
       isImageClicked: !this.state.isImageClicked,
       clickedImageId: imageId
-
+      
     });
   }
 

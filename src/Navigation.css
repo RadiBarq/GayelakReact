@@ -12,7 +12,7 @@
     margin-top: 90px;
     background-color:white;
     margin-right: 10px;
-    z-index: 50;
+    z-index: 500;
     justify-content: center;
 }
 
@@ -21,10 +21,10 @@
     width: 100%;
     position: fixed;
     display: flex;
-    margin-top: 70px;
+    margin-top: 90px;
     background-color:white;
     margin-right: 10px;
-    z-index: 50;
+    z-index: 500;
     justify-content: center;
     
 }

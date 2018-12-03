@@ -118,9 +118,10 @@ class Navigation extends React.Component {
   renderNavigation() {
 
     if (isMobile && !isTablet) {
-      return (
 
+      return (
         <div className="fixedBlockMobile">
+        
           <Box
             display="flex"
             position="absolute"
