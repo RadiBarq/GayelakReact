@@ -9,11 +9,12 @@ import { width } from 'window-size';
 import image from './images/about-us-image.jpg'
 import { FacebookLoginButton } from "react-social-login-buttons";
 import { createButton } from "react-social-login-buttons";
+import default_profile from './images/default_profile.jpg'
 
+import GeoLocation from 'geofire'
 
 class SignUpContent extends React.Component {
 
-    
     constructor(props) {
 
         super(props)
@@ -21,6 +22,7 @@ class SignUpContent extends React.Component {
         this.handlePasswordChange = this._handlePasswordChange.bind(this)
         this.handleUserNameChange = this._handleUserNameChange.bind(this)
         this.onClickRegister = this._onClickRegister.bind(this)
+        this.createFile = this.createFile.bind(this)
 
         this.state = {
 
@@ -35,15 +37,14 @@ class SignUpContent extends React.Component {
         }
 
         var self = this
-
-
+        
+        console.log("this shit" +  default_profile)
         this.state.unsubscribe =  this.state.auth.onAuthStateChanged(function (user) {
 
             if(user)
             {
                    console.log("login succeeded")
             }
-
 
         })  
 
@@ -59,6 +60,19 @@ class SignUpContent extends React.Component {
 
         this.setState({ passwordValue: value });
     }
+
+    async createFile(){
+
+        let response = await fetch('https://firebasestorage.googleapis.com/v0/b/chottky.appspot.com/o/Icons%2Fdefualt_profile.jpg?alt=media&token=7bf53860-d1ad-4723-9137-3ebe80850a0a');
+        let data = await response.blob();
+        let metadata = {
+          contentType: 'image/jpeg'
+        };
+        let file = new File([data], "test.jpg", metadata);
+        // ... do something with the file or return it
+        return file
+      }
+      
 
     _handleUserNameChange({ value }) {
 
@@ -77,6 +91,26 @@ class SignUpContent extends React.Component {
         console.log("things canceled")
     }
 
+     dataURItoBlob(dataURI) {
+        // convert base64 to raw binary data held in a string
+        // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
+        if(typeof dataURI !== 'string'){
+            throw new Error('Invalid argument: dataURI must be a string');
+        }
+        dataURI = dataURI.split(',');
+        var type = dataURI[0].split(':')[1].split(';')[0],
+            byteString = atob(dataURI[1]),
+            byteStringLength = byteString.length,
+            arrayBuffer = new ArrayBuffer(byteStringLength),
+            intArray = new Uint8Array(arrayBuffer);
+        for (var i = 0; i < byteStringLength; i++) {
+            intArray[i] = byteString.charCodeAt(i);
+        }
+        return new Blob([intArray], {
+            type: type
+        });
+      
+      }
     _onClickRegister() {
 
         var emailValue = this.state.emailValue
@@ -86,17 +120,13 @@ class SignUpContent extends React.Component {
         var self = this
 
         this.setState({
-
             showSpinner: true
-
         })
         
         self.state.unsubscribe =  this.state.auth.onAuthStateChanged(function (user) {
-
            
             if (user && self.state.emailValue != " ") {
-                
-               
+
                 // User is signed in.
                 var displayName = user.displayName;
                 var email = user.email;
@@ -113,24 +143,64 @@ class SignUpContent extends React.Component {
 
                 }).then(function() {
 
+                    console.log("image url is " + photoURL)
                     var database = self.props.firebase.database().ref('Users/' + uid).set({
+
                         Email: email,
                         UserId: uid,
                         UserName: self.state.userNameValue,
                         isFacebookVerified: false,
                         numberOfRaters: 0,
                         overallRating: 0,
-                        city: "Nablus"
-                    }).then(function() {
+                        city: "Nablus",
+                        photoURL: "https://firebasestorage.googleapis.com/v0/b/chottky.appspot.com/o/Icons%2Fdefualt_profile.jpg?alt=media&token=7bf53860-d1ad-4723-9137-3ebe80850a0a"
+                
+                    }).then(function(error) {
+                        
+                        //     var storageRef = self.props.firebase.storage().ref().child("Profile_Pictures").child(uid).child("Profile.jpg").put(imageFile).then(function(error){
 
+                        //         if (error == null)
+                        //         {
+                        //             console.log("yess")
+                        //             self.setState({
+    
+                        //                 showSpinner: false
+                        //            })
+                        //          }
+                                 
+                        //          else
+                        //          {
+                        //             console.log(error.errorMessage)
+                        //              self.setState({
+    
+                        //                 showSpinner: false
+                        //            })
+                        //          }
+    
+                        // })
+                        // .catch(err => console.error(err));  
 
-                        console.log("yess")
-                        self.setState({
+                        if (error == null)
+                        {
+                            self.setState({
 
-                            showSpinner: false
+                                showSpinner: false
+                           })
+    
+                           self.props.onDismissAboutUs()
+                           window.location.reload()
+                        }
+
+                        else
+                        {
+                            console.log(error.errorMessage)
+                            self.setState({
+                                showSpinner: false,
+                                showErrorText: error.errorMessage,
+                                showErrorToast: true
                         })
+                    }
 
-                    
                     })
 
                 },   function(error) {
@@ -138,7 +208,11 @@ class SignUpContent extends React.Component {
                          if (error != null)
                          {
                             console.log(error.errorMessage)
-
+                            self.setState({
+                                                showSpinner: false,
+                                                showErrorText: error.errorMessage,
+                                                showErrorToast: true
+                                        })
                          }
                     }
 
@@ -153,9 +227,8 @@ class SignUpContent extends React.Component {
             // Handle Errors here.
 
             if (error != null) {
-                
+
                 self.state.unsubscribe()
-    
                 var errorCode = error.code;
                 var errorMessage = error.message;
                 self.setState({
@@ -174,7 +247,6 @@ class SignUpContent extends React.Component {
             }
             // ...
         });
-
     }
 
 
@@ -206,7 +278,6 @@ class SignUpContent extends React.Component {
                             alignItems="stretch"
                             alignSelf="center"
                             marginTop={6}
-
                         >
                             <Text color="darkGray" size="xl">او</Text>
                         </Box>
@@ -259,7 +330,6 @@ class SignUpContent extends React.Component {
 
                         <Box marginTop={10} paddingX={12} size="md">
                             <Box paddingX={12}>
-
 
                                 {!this.state.showSpinner && (
 

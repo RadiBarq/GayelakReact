@@ -28,9 +28,9 @@ var config = {
     projectId: "chottky",
     storageBucket: "chottky.appspot.com",
     messagingSenderId: "90082227758"
-
   };
 
+  
 var firebase = require("firebase");
 
 class Heading extends React.Component {
@@ -38,7 +38,6 @@ class Heading extends React.Component {
     constructor(props) {
 
           super(props);
-
           this.state = {value: '',
           photoURL: null,
           userSignedIn: false,
@@ -74,9 +73,9 @@ class Heading extends React.Component {
         this.keyPress = this.keyPress.bind(this);
         firebase.initializeApp(config);
         var unsubscribe = firebase.auth().onAuthStateChanged(function (user) {
-
             if(user)
             {
+
                   console.log("user signed in")
                   console.log(user.displayName)
                   console.log(user.photoURL)
@@ -85,6 +84,13 @@ class Heading extends React.Component {
                     photoURL: user.photoURL
 
                   })
+            }
+
+            else
+            {
+              self.setState({
+                userSignedIn: false
+              })
             }
         })  
     }
@@ -247,7 +253,7 @@ class Heading extends React.Component {
                 loginClicked: !this.state.loginClicked
               })
         }
-        
+
         onDismissAboutUs() {
 
             this.setState({
@@ -547,14 +553,12 @@ class Heading extends React.Component {
       this.setState({
         aboutUsClicked: true
       })
-  
-     
+       
      }
   
      else if (itemId == 7)
      {
-  
-  
+
       this.onDismissMenu()
       toast("!عذرا لا تتوفر وظائف شاغرة حاليا     ", {
         autoClose: 4000,
@@ -584,14 +588,16 @@ class Heading extends React.Component {
         bodyClassName: "toastBody",
       },
       )
-
      }
-  
+
      else if (itemId == 10)
      {
         firebase.auth().signOut()
+        this.setState({
+          isSideMenuOpen: false 
+        })
      }
-  
+
     }
   }
 

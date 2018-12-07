@@ -10,10 +10,12 @@ import { FacebookLoginButton } from "react-social-login-buttons";
 import { createButton } from "react-social-login-buttons";
 
 const config = {
+
     text: "Continue With Facebook",
     style: { background: "#3b5998" },
     activeStyle: { background: "#293e69" }
 };
+
 
 const MyFacebookLoginButton = createButton(config);
 
@@ -53,30 +55,26 @@ class LoginContent extends React.Component {
     {
 
              var self = this
-            self.state.auth.signInWithEmailAndPassword(self.state.emailValue, self.state.passwordValue).catch(function(error) {
-            // Handle Errors here.
-
-            if (error != null)
-            {
-                var errorCode = error.code;
-                var errorMessage = error.message;
-
-                self.setState({
-
-                    showSpinner: false,
-                    showErrorText: errorMessage,
-                    showErrorToast: true
-
-                })
-            }
-
-            else{
-                
-              
-            }
+             self.state.auth.signInWithEmailAndPassword(self.state.emailValue, self.state.passwordValue).then(function() {
+                 
+                self.props.onDismissAboutUs() 
 
             // ...
-          });
+          }
+          ).catch(function(error) {
+
+            var errorCode = error.code;
+            var errorMessage = error.message;
+
+            self.setState({
+
+                showSpinner: false,
+                showErrorText: errorMessage,
+                showErrorToast: true
+
+            })
+
+          })
 
     }
 

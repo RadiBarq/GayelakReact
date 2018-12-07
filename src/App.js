@@ -79,7 +79,7 @@ class App extends React.Component {
       booksCategoryArray: [],
       otherCategoryArray: [],
       itemsCurrentSize: 0,
-      maxRadius: 50,
+      maxRadius: 100,
       lat: 0,
       long: 0,
       enableBottomScrolling: false,
@@ -603,7 +603,7 @@ class App extends React.Component {
 
           {this.state.isImageClicked && (
 
-            <ItemContent onClickDownload={this.onClickDownloadFromItem} distanceUnit={this.state.distUnits[this.state.clickedImageId]} distance={this.state.distances[this.state.clickedImageId]} itemId={this.state.finalArray[this.state.clickedImageId]} item={this.state.items[this.state.clickedImageId]} onDismissImage={this.onDismissImage} />
+            <ItemContent onClickDownload={this.onClickDownloadFromItem} distanceUnit={this.state.distUnits[this.state.clickedImageId]} distance={this.state.distances[this.state.clickedImageId]} itemId={this.state.finalArray[this.state.clickedImageId]}  item={this.state.items[this.state.clickedImageId]}  onDismissImage={this.onDismissImage} />
 
           )}
 

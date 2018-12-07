@@ -11,6 +11,7 @@ import grayBackground from './images/gray_background.svg'
 import "react-alice-carousel/lib/alice-carousel.css";
 import AliceCarousel from 'react-alice-carousel';
 import { ENGINE_METHOD_DIGESTS } from 'constants';
+import default_profile from './images/default_profile.jpg'
 var firebase = require("firebase");
 
 class ItemContent extends React.Component {
@@ -34,13 +35,12 @@ class ItemContent extends React.Component {
         var storageRef = firebase.storage().ref()
         var self = this
         var counter = 0
+       
 
         for (var i = 0; i < self.props.item.imagesCount; i++) {
 
-
             var images = []
             const imageNumber = i + 1
-
 
             storageRef.child('Items_Photos/' + self.props.itemId + '/' + imageNumber + '.jpeg').getDownloadURL().then(function (url) {
 
@@ -48,6 +48,16 @@ class ItemContent extends React.Component {
                 console.log(counter)
 
                 if (counter == self.props.item.imagesCount - 1) {
+                    
+                    var ref = storageRef.child('Profile_Pictures/' + self.props.item.itemUserId + '/Profile.jpg')
+                    if (ref == null)
+                    {
+                        console.log("there is no image available")
+                    }
+
+                    else
+                    {
+
                     storageRef.child('Profile_Pictures/' + self.props.item.itemUserId + '/Profile.jpg').getDownloadURL().then(function (url) {
 
                         self.setState({
@@ -60,9 +70,19 @@ class ItemContent extends React.Component {
                         });
 
                     }).catch(function (error) {
-                        console.log(error)
+                        
+                        self.setState({
+
+                            userImageUrl: default_profile ,
+                            userImageReady: true,
+                            itemImagesUrl: images,
+                            itemImageReady: true
+
+                        });
+
                     })
-                }
+                 }
+             }
 
                 counter = counter + 1
 
@@ -141,6 +161,7 @@ class ItemContent extends React.Component {
                 >
 
                     <Box padding={2}>
+
                         {
                             this.renderSlideImages()
                         }
@@ -161,7 +182,7 @@ class ItemContent extends React.Component {
                             <Box column={2} mdColumn={1} marginLeft={3} >
 
                                 <h3 style={{ color: "black", weight: "bold" }}>{this.props.item.price}</h3>
-                                
+
                             </Box>
 
                             <Box>

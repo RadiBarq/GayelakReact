@@ -56,6 +56,7 @@
   width: 70%;
   position: absolute;
 
+
 }
 
 
@@ -63,12 +64,14 @@
 {
     z-index: 1000;
     position: fixed;
+    
 }
 
 .downloadModal
 {
   z-index: 1000;
   position: fixed;
+
 }
 
 .bm-cross-button {
