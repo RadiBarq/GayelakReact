@@ -10,16 +10,14 @@ import IMAGENET_CLASSES from './IMAGENET_CLASSES.js'
 import * as tf from '@tensorflow/tfjs';
 import Lottie from 'react-lottie';
 import * as animationData from './simple_tick-w80-h80.json'
-
-
 var firebase = require("firebase");
+
 
 class UploadFileModal extends React.Component {
     constructor(props) {
-
         super(props)
         this.state = {
-
+            
             accepted: [],
             rejected: [],
             uploadingError: false,
@@ -50,7 +48,6 @@ class UploadFileModal extends React.Component {
         this.uploadLabels = this.uploadLabels.bind(this)
         this.handlePriceChange = this.handlePriceChange.bind(this)
         this.onClickAddPrice = this.onClickAddPrice.bind(this)
-
     }
 
     getLocation(lat, long) {
@@ -202,7 +199,7 @@ class UploadFileModal extends React.Component {
         for (var i = 0; i < labelsArray.length; i++) {
             var label = labelsArray[i]
             console.log("label is " + label)
-            ref.child(label).set({ [key]: " " })
+            ref.child(label).update({ [key]: " " })
         }
     }
 
@@ -261,7 +258,7 @@ class UploadFileModal extends React.Component {
 
     onClickAddPrice()
     {
-
+        
         var self = this
         firebase.database().ref().child("items").child(this.state.itemKey).update({
 
@@ -317,10 +314,18 @@ class UploadFileModal extends React.Component {
         }).then(function (error) {
 
             if (error == null) {
+                firebase.database().ref().child("Users").child(user.uid).child("items").update({[ref.key]: ""}).catch(function(error){
 
+                    if (error != null)
+                    {
+                        console.log(error)
+
+                    }
+                })
+                
                 self.uploadLabels(titles, ref.key)
-
                 geoFire.set(ref.key, [self.state.lat, self.state.long]).then(function () {
+                    
                     var storageRef = firebase.storage().ref().child("Items_Photos").child(ref.key)
                     var counter = 0
                     for (var i = 0; i < accepted.length; i++) {
@@ -350,7 +355,6 @@ class UploadFileModal extends React.Component {
     }
 
     }
-
     processImages(accepted) {
 
         this.setState({ uploading: true })
@@ -362,10 +366,7 @@ class UploadFileModal extends React.Component {
         const defaultOptions = {
             loop: false,
             autoplay: true, 
-            animationData: animationData,
-
-            
-            
+            animationData: animationData
           };
 
           var eventListeners=[
@@ -376,8 +377,8 @@ class UploadFileModal extends React.Component {
             },
           ]
 
-
         return (
+
             <div className="aboutUsModal">
 
                 <img id='test-image-1' style={{ width: "250px", height: "250px", visibility: "hidden" }} />
@@ -419,7 +420,7 @@ class UploadFileModal extends React.Component {
                                                 errorString: "احد الملفات المرفقة لا تنطبق عليه شروط الصور التي نقبلها"
                                             })
                                         }
-
+                            
                                         else if (accepted.length > 5) {
                                             this.setState({
                                                 uploadingError: true,

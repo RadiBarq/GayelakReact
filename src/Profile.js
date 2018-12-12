@@ -1,6 +1,6 @@
 
 import React from 'react'
-import { Box, Column, Divider, Modal, Button, Text, Masonry, Heading, Avatar, Label, Spinner, Tabs, IconButton, TextField, Container } from './gestalt';
+import { Box, Column, Divider, Modal, Button, Text, Masonry, Heading, Avatar, Label, Spinner, Tabs, IconButton, TextField, Container, Icon} from './gestalt';
 import "./App.css";
 import testImage from './items_images/IMG_0098.jpg'
 import { Slide } from 'react-slideshow-image';
@@ -16,6 +16,7 @@ import Rating from 'react-rating';
 import GridItem from './GridItem';
 import ItemContent from './ItemContent'
 import SmallGridItem from './SmallGridItem'
+import Dropzone from 'react-dropzone'
 import { HashRouter, Route, Switch, HashRouter as Router, NavLink } from 'react-router-dom';
 import { isAndroid, isIOS, BrowserView, MobileView, isMobile, isBrowser, isTablet, isSmartTV } from 'react-device-detect';
 import './Profile.css'
@@ -55,8 +56,12 @@ class Profile extends React.Component {
             changeEmailClicked: "",
             changeUserName: "",
             showConfirmationMessage: false,
-            confirmationLabel: ""
-
+            confirmationLabel: "",
+            accepted: [],
+            rejected: [],
+            uploadingError: false,
+            errorString: "",
+            uploading: false    
         };
 
         this.handleChange = this._handleChange.bind(this);
@@ -86,15 +91,11 @@ class Profile extends React.Component {
         this.renderChangePicture = this.renderChangePicture.bind(this)
         this.handleChangeEmail = this.handleChangeEmail.bind(this)
         this.handleChangeUserName = this.handleChangeUserName.bind(this)
-
-
-
-
+        this.processImages = this.processImages.bind(this)
         this.getItems()
         this.getSoldItems()
         this.getFavouriteItems()
         this.getUserData()
-
     }
 
     _handleChange({ activeTabIndex, event }) {
@@ -109,14 +110,59 @@ class Profile extends React.Component {
         });
     }
 
+    processImages(accepted)
+    {  
+
+        this.setState({uploading:true})
+        var image = accepted[0]
+        var self = this
+        var user = firebase.auth().currentUser
+        var uid = user.uid
+        firebase.storage().ref().child("Profile_Pictures").child(uid).child("Profile.jpg").put(image).then(snapshot => 
+        {
+            return snapshot.ref.getDownloadURL();
+        }).then(downloadURL => {
+            
+            user.updateProfile({
+
+                photoURL: downloadURL
+
+            }).then(function(){
+
+                self.setState({
+                uploading: false})
+
+            }).catch(function(error){
+
+                if(error != null)
+                {
+                  self.setState({
+    
+                        showConfirmationMessage: true,
+                        confirmationLabel: error.message
+                    })
+                }
+            }) 
+         }).catch(function(error){
+
+            if(error != null)
+            {
+              self.setState({
+
+                    showConfirmationMessage: true,
+                    confirmationLabel: error.message
+                })
+            }       
+        })
+
+    }
 
     userSettingsClicked() {
 
         this.setState({
-
             userSettingsCliked: !this.state.userSettingsClicked
-
         })
+
     }
 
     renderUserSettings() {
@@ -211,7 +257,7 @@ class Profile extends React.Component {
                                 <Button onClick={() => this.setState({ userSettingsClicked: !this.state.userSettingsClicked, showConfirmationMessage: false, confirmationLabel: "" })} text="تغيير كلمة السر" /></NavLink>
                         </Box>
 
-                        <Box>
+                        <Box marginBottom = {2}>
                             <NavLink to="/profile/picture">
                                 <Button onClick={() => this.setState({ userSettingsClicked: !this.state.userSettingsClicked, showConfirmationMessage: false, confirmationLabel: "" })} text="تغيير الصورة الشخصية" /></NavLink>
                         </Box>
@@ -369,6 +415,7 @@ class Profile extends React.Component {
 
             var numberOfRaters = snapshot.val().numberOfRaters
             var overallRating = snapshot.val().overallRating
+
             var city = snapshot.val().city
 
             self.setState(
@@ -685,10 +732,10 @@ class Profile extends React.Component {
                     footer={
 
                         <Box
-                            display="flex"
-                            flex="grow"
-                            alignItems="stretch"
-                            justifyContent="center"
+                                display="flex"
+                                flex="grow"
+                                alignItems="stretch"
+                                justifyContent="center"
                             paddingY={3}
 
                         >
@@ -908,7 +955,87 @@ class Profile extends React.Component {
     }
 
     renderChangePicture() {
+        return(
 
+        <Container>
+                <Box paddingX={12} marginTop={4}>
+                            <Box>
+                                <p style={{ textAlign: "center", fontWeight: "bold", fontSize: "16pt" }}>غير صورتك الشخصية؟</p>
+                            </Box>
+                            <Box
+                                display="flex"
+                                flex="grow"
+                                alignItems="stretch"
+                                justifyContent="center"
+                                marginBottom={10}
+                               >
+
+                                <Dropzone
+                                    onDrop={(accepted, rejected) => {
+
+                                        this.setState({ accepted, rejected });
+
+                                        if (rejected.length > 0) {
+                                            this.setState({
+                                                uploadingError: true,
+                                                errorString: "احد الملفات المرفقة لا تنطبق عليه شروط الصور التي نقبلها"
+                                            })
+                                        }
+
+                                        else if (accepted.length > 1) {
+                                            this.setState({
+                                                uploadingError: true,
+                                                errorString: "الحد الاقصى للصور المسموح بها هو 5"
+                                            })
+                                        }
+
+                                        else {
+
+                                            this.processImages(accepted)
+
+                                        }
+                                    }}
+                                    accept="image/jpeg, image/png"
+                                    maxSize={5000000}
+                                >
+
+                                    <Box
+                                        marginTop={12}
+                                    >
+                                        <p style={{ textAlign: "center", fontWeight: "bold", fontSize: "12pt" }} >اسحب و الصق او تفصح</p>
+                                        <p style={{ textAlign: "center", fontWeight: "", fontSize: "10pt", marginTop: "-10px" }}>الحد الاقصى لعدد الصور هو 1 وحجم الصورة اقل من 5 ميجا بايت</p>
+
+                                        <Box display="flex"
+                                            flex="grow"
+                                            alignItems="stretch"
+                                            justifyContent="center"
+                                        >
+                                            <Icon icon="add" accessibilityLabel="Pin" color="darkGray" size={25} />
+                                        </Box>
+
+                                    </Box>
+                                </Dropzone>
+                            </Box>
+
+
+                               <Box display="flex"
+                                flex="grow"
+                                alignItems="stretch"
+                                justifyContent="center"
+                                marginBottom={10}>
+                                {this.state.uploadingError &&
+                                    (<p style={{ textAlign: "center", fontWeight: "bold", fontSize: "12pt", color: "red" }} >{this.state.errorString}</p>)}
+
+                                {this.state.uploading && (
+                                    <Box marginTop={2} marginBottom={2}>
+                                        <Spinner show={this.state.uploading} accessibilityLabel="Loading Spinner" />
+                                    </Box>
+                                )}
+                                </Box>
+                                
+
+                </Box>
+            </Container>)
     }
 
     render() {
@@ -991,15 +1118,15 @@ class Profile extends React.Component {
                                 justifyContent="start"
                                 alignItems="stretch">
                                 <label style={userNameLabelStyle}>{firebase.auth().currentUser.displayName}</label>
-
+                            
                                 <Rating
                                     emptySymbol={<img src={starImage} className="icon" />}
                                     fullSymbol={<img src={starImage} className="icon" />}
-                                    initialRating={(this.state.overallRating) / (this.state.numberOfRaters)}
+                                    placeholderRating={0}
                                     readonly />
+
                                 <label style={ratingStyle}>({this.state.numberOfRaters})</label>
                                 <label style={cityLabelStyle}>{this.state.userCity}</label>
-
                             </box>
                         )}
 
@@ -1028,7 +1155,6 @@ class Profile extends React.Component {
                     <Route exact path="/profile/email" component={this.renderChangeEmail} />
                     <Route exact path="/profile/password" component={this.renderChangePassword} />
                     <Route exact path="/profile/picture" component={this.renderChangePicture} />
-
 
 
                 </div>

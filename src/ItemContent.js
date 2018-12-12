@@ -12,6 +12,8 @@ import "react-alice-carousel/lib/alice-carousel.css";
 import AliceCarousel from 'react-alice-carousel';
 import { ENGINE_METHOD_DIGESTS } from 'constants';
 import default_profile from './images/default_profile.jpg'
+import * as animationDataA from './like.json'
+import Lottie from 'react-lottie';
 var firebase = require("firebase");
 
 class ItemContent extends React.Component {
@@ -26,17 +28,94 @@ class ItemContent extends React.Component {
             userImageUrl: "",
             itemImageReady: false,
             itemImagesUrl: [],
-            showSpinner: false
-
+            showSpinner: false,
+            isStopped: true,
+            isPaused: false,
+            speed: 1,
+            direction: 1,
+            isLike: false ,
+            itemFavourties: this.props.item.favourites,
+            showFavourites: false
         }
+
+        this.onClickDownload = this.onClickDownload.bind(this)
+        this.checkFavourite = this.checkFavourite.bind(this)
+        this.clickHandler = this.clickHandler.bind(this)
     }
 
+    componentWillMount()
+    { 
+        var currentUser = firebase.auth().currentUser 
+
+        if (currentUser == null)
+        {
+            this.setState({
+                showFavourites: true    
+        })
+
+        }
+
+        else if (currentUser.uid != this.props.item.itemUserId)
+        {
+            this.setState({
+                    showFavourites: true    
+            })
+        }
+
+        //this.checkFavourite()       
+    }
+
+    checkFavourite()
+    {  
+        var currentUser = firebase.auth().currentUser
+        var userId = currentUser.uid
+        var self = this
+        firebase.database().ref().child("Users").child(userId).child("favourites").once('value', 
+            function(snapshot){
+                
+                if (snapshot.hasChild(self.props.item.itemUserId))
+                {
+                    self.setState({isStopped: false, isLike: true});
+                }
+
+            })
+    }
+
+
     componentDidMount() {
+
         var storageRef = firebase.storage().ref()
         var self = this
-        var counter = 0
-       
 
+
+        var ref = storageRef.child('Profile_Pictures/' + self.props.item.itemUserId + '/Profile.jpg')
+        if (ref == null)
+        {
+            console.log("there is no image available")
+        }
+
+        else
+        {
+
+        storageRef.child('Profile_Pictures/' + self.props.item.itemUserId + '/Profile.jpg').getDownloadURL().then(function (url) {
+
+            self.setState({
+                userImageUrl: url,
+                userImageReady: true
+            });
+
+        }).catch(function (error) {
+            
+            self.setState({
+
+                userImageUrl: default_profile,
+                userImageReady: true
+            });
+
+        })
+     }
+
+        var counter = 0
         for (var i = 0; i < self.props.item.imagesCount; i++) {
 
             var images = []
@@ -48,46 +127,22 @@ class ItemContent extends React.Component {
                 console.log(counter)
 
                 if (counter == self.props.item.imagesCount - 1) {
-                    
-                    var ref = storageRef.child('Profile_Pictures/' + self.props.item.itemUserId + '/Profile.jpg')
-                    if (ref == null)
-                    {
-                        console.log("there is no image available")
-                    }
 
-                    else
-                    {
+                    self.setState({
 
-                    storageRef.child('Profile_Pictures/' + self.props.item.itemUserId + '/Profile.jpg').getDownloadURL().then(function (url) {
-
-                        self.setState({
-
-                            userImageUrl: url,
-                            userImageReady: true,
-                            itemImagesUrl: images,
-                            itemImageReady: true
-
-                        });
-
-                    }).catch(function (error) {
-                        
-                        self.setState({
-
-                            userImageUrl: default_profile ,
-                            userImageReady: true,
-                            itemImagesUrl: images,
-                            itemImageReady: true
-
-                        });
+                        itemImageReady: true,
+                        itemImagesUrl: images
 
                     })
-                 }
-             }
+
+
+                 }  
 
                 counter = counter + 1
 
             }).catch(function (error) {
-                console.log(error)
+
+                console.log(error.errorMessage)
             });
         }
     }
@@ -142,11 +197,99 @@ class ItemContent extends React.Component {
         }
     }
 
+     clickHandler (){
+        var currentFavourites = this.state.itemFavourties
+        const { isStopped, isPaused, direction, speed, isLike } = this.state;
+
+
+        if (!isStopped) {
+          this.setState({ direction: direction * -1 });
+        }
+
+        if (isLike == true)
+        {
+
+            var currentUser = firebase.auth().currentUser
+            var userId = currentUser.uid
+            var self = this
+
+            firebase.database().ref().child("Users").child(userId).child("favourites").child(this.props.itemId).remove()
+
+            firebase.database().ref().child("items").child(this.props.itemId).update({
+                favourites: currentFavourites - 1
+    
+            })
+            this.setState({itemFavourties: currentFavourites - 1})
+        }
+
+        else
+        {
+            console.log("like")
+            var currentFavourites = this.props.item.favourites
+
+            var currentUser = firebase.auth().currentUser
+            var userId = currentUser.uid
+            var self = this
+            var ts = Math.round((new Date()).getTime() / 1000);
+            firebase.database().ref().child("Users").child(userId).child("favourites").update({[this.props.itemId]: ""})
+
+            firebase.database().ref().child("Users").child(this.props.item.itemUserId).child("notifications").child(userId + this.props.itemId).set({
+
+                itemId: this.props.itemId,
+                notificationId: userId + this.props.itemId,
+                reccent: "false",
+                timestamp: ts,
+                type: "favourite",
+                userId: userId,
+                userName: currentUser.displayName
+
+            })
+
+
+            firebase.database().ref().child("items").child(this.props.itemId).update({
+                favourites: currentFavourites + 1
+            })
+
+            this.setState({itemFavourties: currentFavourites + 1})
+        }
+        
+        this.setState({ isStopped: false, isLike: !isLike });
+
+      };
+
+    onClickDownload()
+    {
+        this.props.onDismissImage();
+        this.props.showDownloadModal()
+    }
+
     render() {
+        
+          const defaultOptions = { animationData: animationDataA, loop: false, autoplay: false };
+          const { isStopped, isPaused, direction, speed, isLike } = this.state;
+          const centerStyle = {
+            display: 'block',
+            margin: '10px auto',
+            textAlign: 'center',
+            border: 'none',
+            background: 'none'
+          };
+
+          
+
+          var eventListeners=[
+            {
+              eventName: 'complete',
+              callback: () =>{
+                console.log("animation completed")
+              }
+              ,
+
+            },
+          ]
 
         return (
             <div className="imageModal">
-
                 <Modal
                     accessibilityCloseLabel="close"
                     accessibilityModalLabel="View default padding and styling"
@@ -154,7 +297,7 @@ class ItemContent extends React.Component {
                     onDismiss={this.props.onDismissImage}
                     footer={
                         <Box display="flex" direction="row" justifyContent="center">
-                            <label onClick = { this.props.onClickDownload}  style={{ color: "rgb(52, 127, 251)", fontWeight: "bold", float: "center", fontSize: "14pt" }}>حمل التطبيق لتواصل مع البائع</label>
+                            <label onClick = {this.onClickDownload}  style={{ color: "rgb(52, 127, 251)", fontWeight: "bold", float: "center", fontSize: "14pt" }}>حمل التطبيق لتواصل مع البائع</label>
                         </Box>
                     }
                     size="lg"
@@ -173,7 +316,24 @@ class ItemContent extends React.Component {
                             <Box right={true} position="absolute" marginRight={3}>
                                 <h3 style={{ color: "black", weight: "bold", textAlign: "right" }}>{this.props.distanceUnit + " " + this.props.distance}</h3>
                             </Box>
+                            <Box right={true} position="absolute" marginRight={3} marginTop = {12}>
 
+                            {this.state.showFavourites && (
+                                 <div>
+
+                                 <button style={centerStyle} onClick={this.clickHandler}> <Lottie
+                                 options={defaultOptions}
+                                 height={50}
+                                 width={50}
+                                 isStopped={isStopped}
+                                 isPaused={isPaused}
+                                 speed={speed}
+                                 direction={direction}
+                                 /></button>
+                                 </div>
+                            )}
+                           
+                            </Box>
                             {
                                 this.renderDistanceUnit()
                             }

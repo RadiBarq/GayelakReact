@@ -25,7 +25,7 @@
     white-space: nowrap;      
     overflow: hidden;         
     text-overflow: ellipsis;
-    
+   
 }
 
 .moreIcon
@@ -69,5 +69,12 @@
     background-color: white;
     z-index: 800;
    -webkit-overflow-scrolling: touch;
+
+}
+
+.downloadModal
+{
+  z-index: 1000;
+  position: fixed;
 
 }

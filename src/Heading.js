@@ -38,7 +38,7 @@ class Heading extends React.Component {
     constructor(props) {
 
           super(props);
-          this.state = {value: '',
+          this.state = {searchValue: '',
           photoURL: null,
           userSignedIn: false,
           isSideMenuOpen: false,
@@ -48,8 +48,10 @@ class Heading extends React.Component {
           isDownloadModalOpen: false,
           currentNavigationItem: 0,
           searchButtonClicked: false,
-          uploadFileClicked: false
-
+          uploadFileClicked: false,
+          userId: "",
+          userName: "",
+          searchClicked: false
         }
 
         this.onClickMenu = this.onClickMenu.bind(this);
@@ -67,22 +69,24 @@ class Heading extends React.Component {
         this.navigationClicked = this.navigationClicked.bind(this)
         this.onSearchClicked = this.onSearchClicked.bind(this)
         this.onDismissUploadFile = this.onDismissUploadFile.bind(this)
+        this.handleSearchChange = this.handleSearchChange.bind(this)
       
         this.onDismiss = this.onDismiss.bind(this)
         var self = this
         this.keyPress = this.keyPress.bind(this);
         firebase.initializeApp(config);
         var unsubscribe = firebase.auth().onAuthStateChanged(function (user) {
+
             if(user)
             {
-
                   console.log("user signed in")
                   console.log(user.displayName)
                   console.log(user.photoURL)
                   self.setState({
                     userSignedIn: true,
-                    photoURL: user.photoURL
-
+                    photoURL: user.photoURL,
+                    userId: user.uid,
+                    userName: user.displayName
                   })
             }
 
@@ -328,7 +332,7 @@ class Heading extends React.Component {
         >
           <img style = {{widht: '80px', height: '80px' }} className="profileLogo" onClick ={this.onClickProfile}
                                  src={this.state.photoURL}/>
-            <label onClick = {this.onClickProfile} style = {userNameLabelStyle}>Radi Barq</label>
+            <label onClick = {this.onClickProfile} style = {userNameLabelStyle}>{this.state.userName}</label>
         </Box>
 
         <Box position="absolute" paddingY={0} marginTop={-2} marginRight={6} right={true} direction="column" display="flex" >
@@ -367,7 +371,6 @@ class Heading extends React.Component {
     )
 
   }
-
       renderSideMenu() {
 
         const socialMediaLogosStyle = {
@@ -381,7 +384,7 @@ class Heading extends React.Component {
           textAlign: "right",
           fontWeight: "bold"
         };
-    
+
         return (
           <div className = "fixed">
           <Menu
@@ -411,7 +414,7 @@ class Heading extends React.Component {
             </Box>
 
             <Box position="absolute" paddingY={0} marginTop={-2} marginRight={6} right={true} direction="column" display="flex" >
-    
+
               <label onClick = {() => this.onClickSideMenuItem(0)} style = {menuItemsLabelStyle}>تسجيل الدخول</label>
               <label onClick = {() => this.onClickSideMenuItem(1)} style = {menuItemsLabelStyle}>التسجيل</label>
               <label onClick={() => this.onClickSideMenuItem(2)} style={menuItemsLabelStyle}>
@@ -434,7 +437,6 @@ class Heading extends React.Component {
 
 
       onClickSideMenuItem(itemId) {
-
 
         if (this.state.userSignedIn == false)
          {
@@ -533,18 +535,18 @@ class Heading extends React.Component {
       
       // here profile clicked
       this.onClickProfile()
-     
+
      }
-  
+
     else if (itemId == 5)
      {
-  
+
       toast("يمكنك التواصل معنا حاليا عبر وسائل التواصل الاجتماعي المتوافرة في اعلى القائمة", {
         autoClose: 4000,
         bodyClassName: "toastBody",
       },
       )
-  
+
      }
   
      else if (itemId == 6)
@@ -553,7 +555,7 @@ class Heading extends React.Component {
       this.setState({
         aboutUsClicked: true
       })
-       
+
      }
   
      else if (itemId == 7)
@@ -605,10 +607,10 @@ class Heading extends React.Component {
 
         return(
         <Switch>
-            {this.state.navigationClicked == 0 &&( <Route path="/" render={()=><App onRef={ref => (this.child = ref)}/>}/>)}
+            {this.state.navigationClicked == 0 &&( <Route path="/" render={()=><App showDownloadModal = {this.onDismiss} onRef={ref => (this.child = ref)}/>}/>)}
             {this.state.navigationClicked == 0 &&(<Route path = "/profile" render={() => <h1>Page Not Found</h1>}/>)}  
         </Switch>)
-
+        
      }
 
     onTouchMove(event) {
@@ -626,9 +628,25 @@ class Heading extends React.Component {
     }
 
     keyPress(e){
+
         if(e.keyCode == 13){
-           this.onSearchClicked(this.state.value)
+           this.onSearchClicked(this.state.searchValue)
+           this.setState({
+            searchClicked: true
+           })
         }
+     }
+
+     handleSearchChange({value})
+     {
+
+       this.setState({searchValue: value});
+       if (this.state.searchClicked == true && value == "")
+       {
+         this.child.searchCanceled()
+  
+       }
+
      }
      
     render() {
@@ -692,9 +710,8 @@ class Heading extends React.Component {
                     <SearchField
                         accessibilityLabel="ابحث في جايلك"
                         id="searchField"
-                        onChange={({
-                        value}) => this.setState({value})}
-                        value = {this.state.value}
+                        onChange={this.handleSearchChange}
+                        value = {this.state.searchValue}
                         
                     />
                 </Box>
@@ -722,7 +739,7 @@ class Heading extends React.Component {
             </div>
 
             <Box> 
-              <Route  exact path="/" render={()=><App onRef={ref => (this.child = ref)} />}>
+              <Route  exact path="/" render={()=><App showDownloadModal = {this.onDismiss} onRef={ref => (this.child = ref)} />}>
               </Route>    
               <Route path = "/profile" component = {Profile}/>
               <Route path = "/notifications" component = {Notifications}/>

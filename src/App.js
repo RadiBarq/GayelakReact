@@ -25,7 +25,7 @@ import { HashRouter, Route, Switch, Link, BrowserRouter as Router, NavLink } fro
 import { geolocated } from 'react-geolocated';
 import LoginContent from './LoginContent';
 import SignUpContent from './SignUpContent';
-
+import { image } from '@tensorflow/tfjs';
 
 type Props = {|
   children?: React.Node,
@@ -79,7 +79,7 @@ class App extends React.Component {
       booksCategoryArray: [],
       otherCategoryArray: [],
       itemsCurrentSize: 0,
-      maxRadius: 100,
+      maxRadius: 20,
       lat: 0,
       long: 0,
       enableBottomScrolling: false,
@@ -90,7 +90,8 @@ class App extends React.Component {
       locationReady: false,
       userSignedIn: false,
       photoURL: null,
-      searchClicked: false
+      searchClicked: false,
+      searchKeys: []
     };
 
     this.onDismiss = this.onDismiss.bind(this);
@@ -107,6 +108,7 @@ class App extends React.Component {
     this.renderLocation = this.renderLocation.bind(this);
     this.onClickSearch = this.onClickSearch.bind(this)
     this.searchQuery = this.searchQuery.bind(this)
+    this.searchCanceled = this.searchCanceled.bind(this)
     var self = this
 
    // firebase.auth().signOut()
@@ -135,8 +137,12 @@ class App extends React.Component {
     var counter = 0
     var self = this
     var itms = []
+   
+    //console.log("finalse array" + this.state.finalArray)
+  
 
     if (keys.length == 0) {
+
       self.setState({
 
         items: self.state.items.concat(itms),
@@ -159,9 +165,7 @@ class App extends React.Component {
 
         var price = snapshot.val().price
         if (price != "غير محدد") {
-
           price = snapshot.val().price + snapshot.val().currency
-
         }
 
         var description = snapshot.val().description
@@ -169,6 +173,7 @@ class App extends React.Component {
         var itemUserId = snapshot.val().userId
         var title = snapshot.val().title
         var imagesCount = snapshot.val().imagesCount
+        var favourites = snapshot.val().favourites
 
         itms.push({
 
@@ -177,20 +182,12 @@ class App extends React.Component {
           displayName: displayName,
           itemUserId: itemUserId,
           title: title,
-          imagesCount: imagesCount
+          imagesCount: imagesCount,
+          favourites: favourites
 
         })
 
         if (counter == keys.length - 1) {
-
-          if (self.state.searchClicked == true)
-          {
-             // searchQuery()  
-    
-          }
-
-          else
-          {
 
           self.setState({
 
@@ -202,11 +199,11 @@ class App extends React.Component {
             distUnits: distUnits,
             itemsCurrentSize: keys.length + self.state.finalArray.length,
             lat: lat,
+
             long: long,
             enableBottomScrolling: true
 
           });
-        }
       }
         counter = counter + 1
 
@@ -214,11 +211,128 @@ class App extends React.Component {
     }
   }
 
-  searchQuery()
+   intersect(a, b) {
+    var t;
+    if (b.length > a.length) t = b, b = a, a = t; // indexOf to loop over shorter
+    return a.filter(function (e) {
+        return b.indexOf(e) > -1;
+    });
+    }
+
+  searchQuery(uncommonArray, distances, distUnits)
   {
 
+  
+    console.log("distances  " + distances)
+    console.log("distances units" + distUnits)
+
+    var keysRef = firebase.database().ref().child("tags")
+
+    var fetchedKeys = []
+
+    var self = this
+    var counter = 0
+  
+    for (var i = 0; i < this.state.searchKeys.length; i++)
+    {
+      var keys = []
+      var key = self.state.searchKeys[i]
+  
+      keysRef.child(key).once('value').then(function (snapshot, error) {
+
+        if (error == null)
+        {
+          snapshot.forEach(b=>{
+            var childKey = b.key
+            console.log("child key " + childKey)
+            keys.push(childKey)            
+          })
+
+          if (counter == 0)
+          {
+            fetchedKeys = keys
+
+          }
+
+          else{
+
+              fetchedKeys =  self.intersect(uncommonArray, keys);
+
+          }
+
+          if (counter == self.state.searchKeys.length - 1){
+
+              var finaleArray = self.intersect(uncommonArray, fetchedKeys);
+      
+              console.log("finale array is " + uncommonArray)
+
+              if(finaleArray.length < 12)
+              {
+                if (self.state.currentRadius < self.state.maxRadius)
+                {
+
+                  self.setState({
+
+                    currentRadius: self.state.currentRadius + 4,
+                    itemsKey: [],
+                    itemsCurrentSize: finaleArray.length
+  
+                  }, () => {
+
+                    self.getItems(self.state.lat, self.state.long)
+                  }
+                
+                  )
+                }
+
+                else{
+
+                  if (finaleArray.length == 0)
+                  {
+                      console.log("length is zero " +  finaleArray)
+                      self.itemsReady([],[], [], self.state.lat, self.state.long)
+                  }
+
+                  else{
+
+                    console.log("length is one" +  finaleArray)
+                      self.itemsReady(finaleArray, distances, distUnits, self.state.lat, self.state.long)                    
+                  }
+                }
+              }
+
+              else{
+
+                console.log("length is two" +  finaleArray)
+                self.itemsReady(finaleArray, distances, distUnits, self.state.lat, self.state.long) 
+              }
+          }
+        }
+
+        counter = counter + 1
+      })
+  
+    }
+  }
 
 
+  searchCanceled()
+  { 
+    this.setState({
+      searchClicked: false,
+      finalArray: [],
+      currentRadius: 0.2,
+      items: [],
+      itemsKey: [],
+      distances: [],
+      distUnits:[],
+      itemsCurrentSize: 0,
+      currentItems: [],
+      areItemsReady: false
+
+    },  () => {
+      this.getItems(this.state.lat, this.state.long)
+    })
 
   }
 
@@ -231,27 +345,36 @@ class App extends React.Component {
   onClickSearch(string)
   {   
     var searchKeys = string.toLowerCase().split(" ")
+
     this.setState({
 
       searchClicked: true,
-      finaleArray: [],
-      radius: 0.2,
-      items: []
+      finalArray: [],
+      currentRadius: 0.2,
+      items: [],
+      itemsKey: [],
+      searchKeys: searchKeys,
+      distances: [],
+      distUnits: [],
+      itemsCurrentSize: 0,
+      currentItems: [],
+      areItemsReady: false
 
+    },  () => {
+      this.getItems(this.state.lat, this.state.long)
     })
-
-    this.getItems(this.state.lat, this.state.long)
 
   }
 
   getItems(lat, long) {
-
+    
     var firebaseRef = firebase.database().ref()
     var categoryHash = { 10: "category-others", 9: "category-sports", 8: "category-books", 7: "category-kids", 6: "category-clothes", 5: "category-dog", 4: "cateogry-home", 3: "category-aparment", 2: "phone-category", 1: "category-car" }
     //console.log(this.state.clickedCategory)
     //console.log(this.state.items)
     // console.log("lat is: " + lat, "long is: "+ long)
     // console.log(this.state.currentRadius)
+
 
     this.setState({
 
@@ -289,20 +412,19 @@ class App extends React.Component {
       if (distance < 1) {
 
         distance = (distance.toFixed(1) * 100).toString()
-        self.state.distUnits.push("متر")
+        distUnits.push("متر")
 
       }
 
       else {
 
         distance = distance.toFixed(2).toString()
-        self.state.distUnits.push("كلم")
+        distUnits.push("كلم")
 
       }
 
       self.state.itemsKey.push(key)
       console.log(key)
-      self.state.distances.push(distance)
       dist.push(distance)
 
     });
@@ -310,9 +432,19 @@ class App extends React.Component {
     var onReadyRegistration = geoQuery.on("ready", function () {
 
       if (self.state.currentRadius > self.state.maxRadius) {
+        console.log(self.state.searchClicked )
 
         var uncommonArray = self.state.itemsKey.filter(function (obj) { return self.state.finalArray.indexOf(obj) == -1; });
-        self.itemsReady(uncommonArray, self.state.distances, self.state.distUnits, lat, long)
+        if (self.state.searchClicked == true)
+        {
+            self.searchQuery(uncommonArray, dist, distUnits)
+        }
+
+        else{
+
+          self.itemsReady(uncommonArray, dist, distUnits, lat, long)
+
+        }
 
       }
 
@@ -323,20 +455,30 @@ class App extends React.Component {
           distUnits: [],
           distances: [],
           itemsKey: [],
-          currentRadius: self.state.currentRadius + 2
+          currentRadius: self.state.currentRadius + 4
 
         }, () => {
 
           self.getItems(lat, long)
         });
-
       }
 
       else {
 
         var uncommonArray = self.state.itemsKey.filter(function (obj) { return self.state.finalArray.indexOf(obj) == -1; });
-        self.itemsReady(uncommonArray, self.state.distances, self.state.distUnits, lat, long)
+        console.log(self.state.searchClicked )
 
+        if (self.state.searchClicked == true)
+        { 
+          self.searchQuery(uncommonArray, dist, distUnits)
+        }
+
+        else
+        {
+              
+              self.itemsReady(uncommonArray, dist, distUnits, lat, long)
+        }
+        //self.setState({value: event.target.value});
       }
     });
   }
@@ -356,15 +498,31 @@ class App extends React.Component {
 
   }
 
+
   onDismissImage(imageId) {
+
+    if (image == null)
+    {
+      this.setState({
+
+        isImageClicked: !this.state.isImageClicked,
+
+       });
+
+    }
+
+    else
+    {
 
     this.setState({
 
       isImageClicked: !this.state.isImageClicked,
       clickedImageId: imageId
       
-    });
+     });
+    }
   }
+
 
   onTouchHeader(event) {
     event.stopPropagation()
@@ -393,7 +551,6 @@ class App extends React.Component {
 
         const itemId = i
         gridItems.push(<GridItem price={this.state.items[i].price} itemId={i} imageId={this.state.finalArray[i]} onDismissImage={() => this.onDismissImage(itemId)} />)
-
       }
 
       return (
@@ -428,13 +585,11 @@ class App extends React.Component {
 
       var gridItems = []
       for (var i = 0; i < this.state.finalArray.length; i++) {
-
         const itemId = i
         gridItems.push(<SmallGridItem price={this.state.items[i].price} itemId={i} imageId={this.state.finalArray[i]} onDismissImage={() => this.onDismissImage(itemId)} />)
       }
 
       return (<div>
-
         <StackGrid
           appear={scaleDown.appear}
           appeared={scaleDown.appeared}
@@ -453,7 +608,6 @@ class App extends React.Component {
           {
             gridItems
           }
-
 
         </StackGrid>
 
@@ -569,7 +723,6 @@ class App extends React.Component {
     )
   }
 
-
   render() {
 
     const { children } = this.props;
@@ -601,10 +754,9 @@ class App extends React.Component {
           <ToastContainer hideProgressBar={true} />
           <GeoLocation setLocationDisabled={this.setLocationDisabled} setLocationEnabled={this.setLocationEnabled} getItems={this.getItems} />
 
+
           {this.state.isImageClicked && (
-
-            <ItemContent onClickDownload={this.onClickDownloadFromItem} distanceUnit={this.state.distUnits[this.state.clickedImageId]} distance={this.state.distances[this.state.clickedImageId]} itemId={this.state.finalArray[this.state.clickedImageId]}  item={this.state.items[this.state.clickedImageId]}  onDismissImage={this.onDismissImage} />
-
+            <ItemContent  showDownloadModal = {this.props.showDownloadModal} onClickDownload={this.onClickDownloadFromItem} distanceUnit={this.state.distUnits[this.state.clickedImageId]} distance={this.state.distances[this.state.clickedImageId]} itemId={this.state.finalArray[this.state.clickedImageId]}  item={this.state.items[this.state.clickedImageId]}  onDismissImage={this.onDismissImage} />
           )}
 
           {this.renderHeader()}

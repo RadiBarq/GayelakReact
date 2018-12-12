@@ -115,11 +115,30 @@ class Notifications extends React.Component {
                             }
 
                         }).catch(function (error) {
-                            console.log(error.messaage)
+                            
+
+                            console.log(type)
+                            usersURL.push("https://firebasestorage.googleapis.com/v0/b/chottky.appspot.com/o/Icons%2Fdefualt_profile.jpg?alt=media&token=7bf53860-d1ad-4723-9137-3ebe80850a0a")
+                            counter = counter + 1
+
+                            if (counter == itemsCount) {
+                                self.setState({
+
+                                    showSpinner: false,
+                                    items: currentItems,
+                                    itemsReady: true,
+                                    itemsURL: itemsURL,
+                                    usersURL: usersURL
+                                })
+
+                            }
+
+                            console.log(error)
                         });
                     }
         
                 }).catch(function (error) {
+
                     console.log(error.messaage)
                 });
             }
