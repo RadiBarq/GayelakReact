@@ -1,9 +1,9 @@
 
 <h1>Local Buying And Selling Site</h1>
-<p>React Js, AI website to connect local university students to sell and buy products locally and easy</p>
+<p>React JS, AI website to connect local university students to sell and buy products locally and easily</p>
 
 <h2>About The Project</h2>
-<p>This project created for the web course to make it easy for university students to sell and buy used prducts online what makes this project unique is using both AI and location-based techonlogis to make it very easy for the user to post items online, so that with only one picture form the user our system could identify what is the picture title and where is the user location.</p><p>Also our webstie make it very easy for buyers to find items nearby without the need to pick the city or the area he lives in, also because we use AI we give more accurate results when the user searching for an item.</p>
+<p>This project created for the web course to make it easy for university students to sell and buy used prducts online what makes this project unique is using both AI and location-based techonlogis to make it very easy for the students to post items online, so that with only one picture form the user our system could identify what is the picture title and where is the user location.</p><p>Also our webstie makes it very easy for buyers to find items nearby without the need to pick the city or the area they live in, also because we use AI we give more accurate results when the user searching for an item.</p>
 
 <h2>Start Using The Beta Version</h2>
 <p>https://chottky.firebaseapp.com/</p>
@@ -15,8 +15,8 @@
   <li>Firebase Realtime Database for backend and authintication.</li>
   <li>Firebase Hosting for hosting the webstie.</li>
   <li> Firebase Geofire for giving results according to the user location.</li>
-  <li>Other React Js open source components to improve the design of the website.</li>
-  <li>Microsoft VS Code as an editor to write the code of whole site.</li>
+  <li>Other React JS open source components to improve the design of the website.</li>
+  <li>Microsoft VS Code as an editor to write the code of the whole site.</li>
 </ul>
 
 <h2>Screenshots Of The Project</h2>
@@ -27,6 +27,10 @@
 
 <h2>Authors</h2>
 <p>This project created only by RadiBarq.</p>
+
+<h2>Licence</h2>
+<p>
+This project is licensed under the MIT License - see the LICENSE.md file for details.</p>
 
 
 
